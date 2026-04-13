@@ -58,8 +58,10 @@
   [data-theme="dark"] .badge-del { background: #7f1d1d; color: #fca5a5; }
   [data-theme="dark"] .badge-chg { background: #78350f; color: #fcd34d; }
 
-  .diff-section { margin-bottom: 1.5rem; }
-  .diff-section h6 { font-size: .85rem; font-weight: 700; color: var(--text-muted2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .5rem; }
+  .diff-section { margin-bottom: .75rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .diff-section-header { font-size: .85rem; font-weight: 700; color: var(--text-muted2); text-transform: uppercase; letter-spacing: .05em; margin: 0; padding: 7px 10px; background: var(--bg); }
+  .diff-section-header:hover { background: var(--border); }
+  .diff-section-body { padding: 8px; }
   .diff-item { font-size: .82rem; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; background: var(--bg); }
   .formula-box { font-family: monospace; font-size: .78rem; background: var(--bg); border-radius: 4px; padding: 4px 8px; margin-top: 4px; word-break: break-all; }
   .formula-old { color: #dc3545; text-decoration: line-through; }
@@ -448,6 +450,13 @@ async function runDiff() {
   }
 }
 
+let _diffSectionOpen = { cf: true, fl: true, ds: true, sh: true };
+
+function toggleDiffSection(key) {
+  _diffSectionOpen[key] = !_diffSectionOpen[key];
+  renderDiff(_lastDiffData);
+}
+
 function renderDiff(data) {
   _lastDiffData = data;
   const csvBtn = document.getElementById('diff-csv-btn');
@@ -456,12 +465,14 @@ function renderDiff(data) {
   const bRev = data.base_revision || {};
   const hRev = data.head_revision || {};
 
-  let html = `<div class="mb-3 small text-muted">
-    <strong>${esc(data.workbook_name)}</strong> &nbsp;
-    v${esc(bRev.revision_number)} (${esc(bRev.created_at ? new Date(bRev.created_at).toLocaleString() : '—')})
-    <i class="bi bi-arrow-right mx-1"></i>
-    v${esc(hRev.revision_number)} (${esc(hRev.created_at ? new Date(hRev.created_at).toLocaleString() : '—')})
-  </div>`;
+  const _revLabel = r => {
+    const dt  = r.created_at ? new Date(r.created_at).toLocaleString() : '—';
+    const pub = r.publisher  ? ` (${esc(r.publisher)})`                : '';
+    return `v${esc(r.revision_number)} &nbsp;<span class="text-muted">${dt}${pub}</span>`;
+  };
+
+  let html = `<div class="mb-3 small">${_revLabel(bRev)}
+    <i class="bi bi-arrow-right mx-2 text-muted"></i>${_revLabel(hRev)}</div>`;
 
   const totalChanges =
     (diff.calculated_fields?.added?.length || 0) +
@@ -480,10 +491,26 @@ function renderDiff(data) {
     return;
   }
 
+  /** セクション折りたたみ付きヘッダーを生成 */
+  function _sectionHeader(key, label, added, deleted, changed) {
+    const open   = _diffSectionOpen[key];
+    const chev   = open ? 'bi-chevron-up' : 'bi-chevron-down';
+    let badges   = '';
+    if (added)   badges += `<span class="badge badge-add ms-1">+${added}</span>`;
+    if (deleted) badges += `<span class="badge badge-del ms-1">-${deleted}</span>`;
+    if (changed) badges += `<span class="badge badge-chg ms-1">~${changed}</span>`;
+    if (!added && !deleted && !changed)
+      badges = '<span class="badge bg-secondary ms-1">変更なし</span>';
+    return `<h6 class="diff-section-header" onclick="toggleDiffSection('${key}')" style="cursor:pointer;user-select:none">
+      <i class="bi ${chev} me-1 small"></i>${label}${badges}</h6>`;
+  }
+
   // 計算フィールド
   const cf = diff.calculated_fields || {};
-  if ((cf.added?.length || cf.deleted?.length || cf.changed?.length)) {
-    html += '<div class="diff-section"><h6>計算フィールド</h6>';
+  const cfA = cf.added?.length || 0, cfD = cf.deleted?.length || 0, cfC = cf.changed?.length || 0;
+  html += '<div class="diff-section">' + _sectionHeader('cf', '計算フィールド', cfA, cfD, cfC);
+  if (_diffSectionOpen.cf && (cfA || cfD || cfC)) {
+    html += '<div class="diff-section-body">';
     (cf.added || []).forEach(f => {
       html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
         <div class="formula-box formula-new">${esc(f.formula)}</div></div>`;
@@ -499,11 +526,14 @@ function renderDiff(data) {
     });
     html += '</div>';
   }
+  html += '</div>';
 
   // フィルター
   const fl = diff.filters || {};
-  if ((fl.added?.length || fl.deleted?.length)) {
-    html += '<div class="diff-section"><h6>フィルター</h6>';
+  const flA = fl.added?.length || 0, flD = fl.deleted?.length || 0;
+  html += '<div class="diff-section">' + _sectionHeader('fl', 'フィルター', flA, flD, 0);
+  if (_diffSectionOpen.fl && (flA || flD)) {
+    html += '<div class="diff-section-body">';
     (fl.added || []).forEach(f => {
       html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet)}</span></div>`;
     });
@@ -512,11 +542,14 @@ function renderDiff(data) {
     });
     html += '</div>';
   }
+  html += '</div>';
 
   // データソース
   const ds = diff.datasources || {};
-  if ((ds.added?.length || ds.deleted?.length)) {
-    html += '<div class="diff-section"><h6>データソース</h6>';
+  const dsA = ds.added?.length || 0, dsD = ds.deleted?.length || 0;
+  html += '<div class="diff-section">' + _sectionHeader('ds', 'データソース', dsA, dsD, 0);
+  if (_diffSectionOpen.ds && (dsA || dsD)) {
+    html += '<div class="diff-section-body">';
     (ds.added || []).forEach(d => {
       html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(d.caption || d.name)}</div>`;
     });
@@ -525,11 +558,14 @@ function renderDiff(data) {
     });
     html += '</div>';
   }
+  html += '</div>';
 
   // シート
   const sh = diff.sheets || {};
-  if ((sh.added?.length || sh.deleted?.length)) {
-    html += '<div class="diff-section"><h6>シート</h6>';
+  const shA = sh.added?.length || 0, shD = sh.deleted?.length || 0;
+  html += '<div class="diff-section">' + _sectionHeader('sh', 'シート', shA, shD, 0);
+  if (_diffSectionOpen.sh && (shA || shD)) {
+    html += '<div class="diff-section-body">';
     (sh.added || []).forEach(s => {
       html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(s.name)} <span class="text-muted small">${esc(s.type)}</span></div>`;
     });
@@ -538,6 +574,7 @@ function renderDiff(data) {
     });
     html += '</div>';
   }
+  html += '</div>';
 
   document.getElementById('diff-result').innerHTML = html;
 }
@@ -554,13 +591,28 @@ async function runFields() {
 
   btn.disabled = true;
   document.getElementById('fields-result').innerHTML =
-    '<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>解析中...</div>';
+    '<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>ワークブックを解析中...</div>';
   document.getElementById('fields-table-wrap').style.display = 'none';
   document.getElementById('sankey-wrap').style.display = 'none';
+  const dsPanel = document.getElementById('fields-ds-panel');
+  if (dsPanel) dsPanel.remove();
 
   try {
     const data = await fetchJSON(`/api/workbooks/${wbId}/fields`);
     _allFields = data.calculated_fields || [];
+
+    // データソース情報パネル
+    const datasources = data.datasources || [];
+    if (datasources.length) {
+      const panel = document.createElement('div');
+      panel.id = 'fields-ds-panel';
+      panel.className = 'mb-3 p-2 rounded small';
+      panel.style.background = 'var(--bg)';
+      panel.innerHTML = '<span class="fw-bold text-muted me-2"><i class="bi bi-database me-1"></i>データソース</span>' +
+        datasources.map(d => `<span class="badge bg-secondary me-1">${esc(d.caption || d.name)}</span>`).join('');
+      document.getElementById('fields-table-wrap').before(panel);
+    }
+
     renderFieldsTable(_allFields);
     renderSankey(_allFields);
     document.getElementById('fields-result').innerHTML = '';
