@@ -120,10 +120,12 @@
           <div class="col-md-5">
             <label class="form-label small text-muted mb-1">ワークブックを検索</label>
             <div class="position-relative" id="diff-wb-wrap">
-              <input type="text" id="diff-wb-input" class="form-control form-control-sm"
+              <input type="text" id="diff-wb-input" class="form-control form-control-sm pe-4"
                      autocomplete="off" placeholder="— 名前またはプロジェクトで検索 —"
-                     oninput="filterWbDropdown('diff', this.value)"
+                     oninput="filterWbDropdown('diff', this.value); toggleClear('diff')"
                      onfocus="showWbDropdown('diff')" />
+              <span id="diff-wb-clear" onclick="clearWbSearch('diff')"
+                    style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;color:#999;font-size:1rem;line-height:1;">&times;</span>
               <div class="wb-dropdown" id="diff-wb-dropdown"></div>
               <input type="hidden" id="diff-wb-value" />
             </div>
@@ -171,10 +173,12 @@
           <div class="col-md-6">
             <label class="form-label small text-muted mb-1">ワークブックを検索</label>
             <div class="position-relative" id="fields-wb-wrap">
-              <input type="text" id="fields-wb-input" class="form-control form-control-sm"
+              <input type="text" id="fields-wb-input" class="form-control form-control-sm pe-4"
                      autocomplete="off" placeholder="— 名前またはプロジェクトで検索 —"
-                     oninput="filterWbDropdown('fields', this.value)"
+                     oninput="filterWbDropdown('fields', this.value); toggleClear('fields')"
                      onfocus="showWbDropdown('fields')" />
+              <span id="fields-wb-clear" onclick="clearWbSearch('fields')"
+                    style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;color:#999;font-size:1rem;line-height:1;">&times;</span>
               <div class="wb-dropdown" id="fields-wb-dropdown"></div>
               <input type="hidden" id="fields-wb-value" />
             </div>
@@ -328,9 +332,35 @@ function selectWb(prefix, id, label) {
   document.getElementById(`${prefix}-wb-input`).value = label;
   document.getElementById(`${prefix}-wb-value`).value = id;
   document.getElementById(`${prefix}-wb-dropdown`).style.display = 'none';
+  toggleClear(prefix);
   if (prefix === 'diff') onDiffWbSelect(id);
   if (prefix === 'fields') {
     document.getElementById('fields-run-btn').disabled = false;
+  }
+}
+
+function toggleClear(prefix) {
+  const inp = document.getElementById(`${prefix}-wb-input`);
+  const btn = document.getElementById(`${prefix}-wb-clear`);
+  if (btn) btn.style.display = inp && inp.value ? 'block' : 'none';
+}
+
+function clearWbSearch(prefix) {
+  const inp = document.getElementById(`${prefix}-wb-input`);
+  const val = document.getElementById(`${prefix}-wb-value`);
+  const btn = document.getElementById(`${prefix}-wb-clear`);
+  if (inp) inp.value = '';
+  if (val) val.value = '';
+  if (btn) btn.style.display = 'none';
+  filterWbDropdown(prefix, '');
+  // 対応するボタンを無効化
+  const runBtn = document.getElementById(`${prefix}-run-btn`);
+  if (runBtn) runBtn.disabled = true;
+  if (prefix === 'diff') {
+    const baseEl = document.getElementById('diff-base-select');
+    const headEl = document.getElementById('diff-head-select');
+    if (baseEl) { baseEl.innerHTML = '<option value="">—</option>'; baseEl.disabled = true; }
+    if (headEl) { headEl.innerHTML = '<option value="">—</option>'; headEl.disabled = true; }
   }
 }
 
