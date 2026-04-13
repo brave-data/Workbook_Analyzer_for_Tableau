@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import tempfile
 import zipfile
 from datetime import datetime
@@ -116,6 +117,23 @@ def _parse_twb_fields(content: str) -> dict:
             datasources.append({"name": ds_name, "caption": caption})
             seen_ds.add(ds_name)
 
+        # 内部名 → 論理名(caption) のマッピングを構築
+        name_to_caption: dict[str, str] = {}
+        for col in ds.iter("column"):
+            internal = col.get("name", "")
+            cap = col.get("caption", "")
+            if internal and cap:
+                name_to_caption[internal] = cap
+
+        def _resolve_formula(formula: str) -> str:
+            """フォーミュラ内の内部名 [Calculation_xxx] を論理名に変換"""
+            def _replace(m: re.Match) -> str:
+                key = m.group(0)          # e.g. [Calculation_3376503514920759299]
+                inner = m.group(1)        # e.g. Calculation_3376503514920759299
+                display = name_to_caption.get(key) or name_to_caption.get(f"[{inner}]")
+                return f"[{display}]" if display else key
+            return re.sub(r'\[([^\]]+)\]', _replace, formula)
+
         for col in ds.iter("column"):
             formula_el = col.find("calculation")
             if formula_el is None:
@@ -127,7 +145,7 @@ def _parse_twb_fields(content: str) -> dict:
             calc_fields.append({
                 "datasource": caption or ds_name,
                 "field":      field_name,
-                "formula":    formula,
+                "formula":    _resolve_formula(formula),
                 "datatype":   col.get("datatype", ""),
             })
 
@@ -203,7 +221,12 @@ def fetch_workbook_revisions(workbook_id: str) -> dict:
     try:
         wb = server.workbooks.get_by_id(workbook_id)
         server.workbooks.populate_revisions(wb)
-        revs = list(wb.revisions)
+        # 新しい順にソート（UIのデフォルト選択: revs[0]=最新, revs[1]=1つ前）
+        revs = sorted(
+            wb.revisions,
+            key=lambda r: getattr(r, "revision_number", 0),
+            reverse=True,
+        )
         return {
             "workbook_id":   workbook_id,
             "workbook_name": wb.name,
@@ -316,11 +339,12 @@ def fetch_workbook_revision_diff(workbook_id: str, base_rev=None, head_rev=None)
                 else:
                     url = f"{server.workbooks.baseurl}/{workbook_id}/revisions/{rev_num}/content"
                     resp = server.workbooks.get_request(url)
-                    import pathlib, mimetypes
-                    ct = resp.headers.get("Content-Type", "")
-                    ext = ".twbx" if "zip" in ct else ".twb"
+                    import pathlib
+                    # Content-Type ではなくマジックバイトで ZIP 判定（octet-stream 対策）
+                    content_bytes = resp.content
+                    ext = ".twbx" if content_bytes[:2] == b"PK" else ".twb"
                     out = pathlib.Path(tmpdir) / f"rev{rev_num}{ext}"
-                    out.write_bytes(resp.content)
+                    out.write_bytes(content_bytes)
                     file_path = str(out)
 
                 import pathlib

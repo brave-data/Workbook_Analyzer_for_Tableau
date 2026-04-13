@@ -31,8 +31,9 @@
   body            { background: var(--bg); color: var(--text); transition: background .2s, color .2s; }
   .card           { background: var(--card-bg); border-color: var(--border) !important; }
   .navbar         { background: var(--nav-bg) !important; }
-  .nav-link       { color: var(--nav-text) !important; }
-  .nav-link.active{ color: #fff !important; border-bottom: 2px solid #4da6ff; }
+  .navbar .nav-link { color: var(--nav-text) !important; }
+  .nav-tabs .nav-link       { color: var(--text) !important; opacity: .7; }
+  .nav-tabs .nav-link.active{ color: var(--text) !important; opacity: 1; font-weight: 600; border-bottom: 2px solid #4da6ff; }
 
   /* 検索ドロップダウン */
   .wb-dropdown {
