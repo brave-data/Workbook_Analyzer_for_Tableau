@@ -151,9 +151,12 @@
             </select>
           </div>
 
-          <div class="col-md-2">
-            <button id="diff-run-btn" class="btn btn-sm btn-primary w-100" onclick="runDiff()" disabled>
+          <div class="col-md-2 d-flex gap-1">
+            <button id="diff-run-btn" class="btn btn-sm btn-primary flex-grow-1" onclick="runDiff()" disabled>
               <i class="bi bi-search me-1"></i>比較を実行
+            </button>
+            <button id="diff-csv-btn" class="btn btn-sm btn-outline-secondary" onclick="downloadDiffCSV()" disabled title="CSVをダウンロード">
+              <i class="bi bi-download"></i>
             </button>
           </div>
         </div>
@@ -193,9 +196,14 @@
 
         <!-- フィールド一覧 -->
         <div id="fields-table-wrap" style="display:none" class="mb-3">
-          <input type="text" id="fields-filter-input" class="form-control form-control-sm mb-2"
-                 placeholder="フィールド名・フォーミュラで絞り込み..."
-                 oninput="filterFieldsTable(this.value)" />
+          <div class="d-flex gap-2 mb-2">
+            <input type="text" id="fields-filter-input" class="form-control form-control-sm"
+                   placeholder="フィールド名・フォーミュラで絞り込み..."
+                   oninput="filterFieldsTable(this.value)" />
+            <button class="btn btn-sm btn-outline-secondary flex-shrink-0" onclick="downloadFieldsCSV()" title="CSVをダウンロード">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
           <div style="max-height:300px;overflow-y:auto;">
             <table class="table table-sm table-hover mb-0" id="fields-table">
               <thead class="table-light sticky-top">
@@ -441,6 +449,9 @@ async function runDiff() {
 }
 
 function renderDiff(data) {
+  _lastDiffData = data;
+  const csvBtn = document.getElementById('diff-csv-btn');
+  if (csvBtn) csvBtn.disabled = false;
   const diff = data.diff || {};
   const bRev = data.base_revision || {};
   const hRev = data.head_revision || {};
@@ -665,6 +676,66 @@ function renderSankey(fields) {
     .text(d => d.name);
 
   document.getElementById('sankey-wrap').style.display = 'block';
+}
+
+// ─────────────────────────────────────────────
+// CSV ダウンロード
+// ─────────────────────────────────────────────
+let _lastDiffData = null;
+
+function _csvEscape(v) {
+  const s = String(v ?? '');
+  return s.includes(',') || s.includes('"') || s.includes('\n')
+    ? '"' + s.replace(/"/g, '""') + '"'
+    : s;
+}
+
+function _downloadCSV(rows, filename) {
+  const bom = '\uFEFF'; // Excel BOM
+  const csv = bom + rows.map(r => r.map(_csvEscape).join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function downloadDiffCSV() {
+  if (!_lastDiffData) return;
+  const diff = _lastDiffData.diff || {};
+  const wbName = _lastDiffData.workbook_name || 'workbook';
+  const bRev = (_lastDiffData.base_revision || {}).revision_number || '';
+  const hRev = (_lastDiffData.head_revision || {}).revision_number || '';
+  const rows = [['カテゴリ', '変更種別', 'フィールド名/シート名', 'データソース', '変更前', '変更後']];
+
+  const cf = diff.calculated_fields || {};
+  (cf.added   || []).forEach(f => rows.push(['計算フィールド', '追加', f.field, f.datasource, '', f.formula]));
+  (cf.deleted || []).forEach(f => rows.push(['計算フィールド', '削除', f.field, f.datasource, f.formula, '']));
+  (cf.changed || []).forEach(f => rows.push(['計算フィールド', '変更', f.field, f.datasource, f.old_formula, f.new_formula]));
+
+  const fl = diff.filters || {};
+  (fl.added   || []).forEach(f => rows.push(['フィルター', '追加', f.field, f.sheet || '', '', '']));
+  (fl.deleted || []).forEach(f => rows.push(['フィルター', '削除', f.field, f.sheet || '', '', '']));
+
+  const ds = diff.datasources || {};
+  (ds.added   || []).forEach(d => rows.push(['データソース', '追加', d.caption || d.name, '', '', '']));
+  (ds.deleted || []).forEach(d => rows.push(['データソース', '削除', d.caption || d.name, '', '', '']));
+
+  const sh = diff.sheets || {};
+  (sh.added   || []).forEach(s => rows.push(['シート', '追加', s.name, s.type, '', '']));
+  (sh.deleted || []).forEach(s => rows.push(['シート', '削除', s.name, s.type, '', '']));
+
+  _downloadCSV(rows, `diff_${wbName}_v${bRev}_v${hRev}.csv`);
+}
+
+function downloadFieldsCSV() {
+  if (!_allFields.length) return;
+  const wbName = (document.getElementById('fields-wb-input') || {}).value || 'workbook';
+  const rows = [['フィールド名', 'データソース', 'フォーミュラ']];
+  _allFields.forEach(f => rows.push([f.field, f.datasource, f.formula]));
+  _downloadCSV(rows, `fields_${wbName}.csv`);
 }
 
 // ─────────────────────────────────────────────
