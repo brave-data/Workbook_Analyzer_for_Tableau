@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Workbook Analyzer for Tableau</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+<style>
+  :root {
+    --bg:         #f4f6fb;
+    --card-bg:    #ffffff;
+    --text:       #1a2a3a;
+    --text-muted2:#7a8fa6;
+    --border:     #dee2e6;
+    --nav-bg:     #1a2a3a;
+    --nav-text:   #cfe2ff;
+    --badge-add:  #198754;
+    --badge-del:  #dc3545;
+    --badge-chg:  #fd7e14;
+  }
+  [data-theme="dark"] {
+    --bg:         #0f1923;
+    --card-bg:    #162230;
+    --text:       #cfe2ff;
+    --text-muted2:#5a7a9a;
+    --border:     #1e3448;
+    --nav-bg:     #0a1520;
+    --nav-text:   #80b0d0;
+  }
+  body            { background: var(--bg); color: var(--text); transition: background .2s, color .2s; }
+  .card           { background: var(--card-bg); border-color: var(--border) !important; }
+  .navbar         { background: var(--nav-bg) !important; }
+  .nav-link       { color: var(--nav-text) !important; }
+  .nav-link.active{ color: #fff !important; border-bottom: 2px solid #4da6ff; }
+
+  /* 検索ドロップダウン */
+  .wb-dropdown {
+    display: none; position: absolute; z-index: 1050; width: 100%;
+    max-height: 240px; overflow-y: auto;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  }
+  .wb-item {
+    padding: 8px 12px; cursor: pointer; font-size: .85rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .wb-item:last-child { border-bottom: none; }
+  .wb-item:hover { background: #e8f0fe; }
+  [data-theme="dark"] .wb-item:hover { background: #1e3448; }
+
+  /* 差分バッジ */
+  .badge-add { background: #d1fae5; color: #065f46; }
+  .badge-del { background: #fee2e2; color: #991b1b; }
+  .badge-chg { background: #ffedd5; color: #92400e; }
+  [data-theme="dark"] .badge-add { background: #064e3b; color: #6ee7b7; }
+  [data-theme="dark"] .badge-del { background: #7f1d1d; color: #fca5a5; }
+  [data-theme="dark"] .badge-chg { background: #78350f; color: #fcd34d; }
+
+  .diff-section { margin-bottom: 1.5rem; }
+  .diff-section h6 { font-size: .85rem; font-weight: 700; color: var(--text-muted2); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .5rem; }
+  .diff-item { font-size: .82rem; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; background: var(--bg); }
+  .formula-box { font-family: monospace; font-size: .78rem; background: var(--bg); border-radius: 4px; padding: 4px 8px; margin-top: 4px; word-break: break-all; }
+  .formula-old { color: #dc3545; text-decoration: line-through; }
+  .formula-new { color: #198754; }
+
+  /* Sankey */
+  #sankey-svg { width: 100%; overflow: visible; }
+  .sankey-link { fill: none; stroke-opacity: .3; }
+  .sankey-link:hover { stroke-opacity: .6; }
+  .sankey-node rect { rx: 4; }
+
+  /* ステータスバー */
+  #status-bar { font-size: .78rem; padding: 4px 12px; }
+  .spinner-border-sm { width: 1rem; height: 1rem; }
+</style>
+</head>
+<body>
+
+<!-- ナビゲーション -->
+<nav class="navbar navbar-expand-lg px-3 py-2">
+  <span class="navbar-brand text-white fw-bold fs-6">
+    <i class="bi bi-diagram-3 me-2 text-info"></i>Workbook Analyzer for Tableau
+  </span>
+  <div class="ms-auto d-flex align-items-center gap-2">
+    <span id="status-bar" class="text-secondary"></span>
+    <button class="btn btn-sm btn-outline-secondary" onclick="doRefresh()" title="ワークブック一覧を再取得">
+      <i class="bi bi-arrow-clockwise"></i>
+    </button>
+    <button class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()" title="ダークモード切替">
+      <i class="bi bi-moon-stars-fill"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- タブ -->
+<div class="container-fluid px-3 pt-3">
+  <ul class="nav nav-tabs mb-3" id="mainTabs">
+    <li class="nav-item">
+      <a class="nav-link active" data-bs-toggle="tab" href="#tab-diff">
+        <i class="bi bi-clock-history me-1"></i>リビジョン差分
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="#tab-fields">
+        <i class="bi bi-diagram-2 me-1"></i>計算フィールド分析
+      </a>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- ── リビジョン差分タブ ── -->
+    <div class="tab-pane fade show active" id="tab-diff">
+      <div class="card border-0 shadow-sm p-3">
+        <div class="row g-2 align-items-end mb-3">
+
+          <!-- ワークブック検索 -->
+          <div class="col-md-5">
+            <label class="form-label small text-muted mb-1">ワークブックを検索</label>
+            <div class="position-relative" id="diff-wb-wrap">
+              <input type="text" id="diff-wb-input" class="form-control form-control-sm"
+                     autocomplete="off" placeholder="— 名前またはプロジェクトで検索 —"
+                     oninput="filterWbDropdown('diff', this.value)"
+                     onfocus="showWbDropdown('diff')" />
+              <div class="wb-dropdown" id="diff-wb-dropdown"></div>
+              <input type="hidden" id="diff-wb-value" />
+            </div>
+          </div>
+
+          <!-- 比較元 -->
+          <div class="col-md-2">
+            <label class="form-label small text-muted mb-1">比較元 (Base)</label>
+            <select id="diff-base-select" class="form-select form-select-sm" disabled>
+              <option value="">—</option>
+            </select>
+          </div>
+
+          <div class="col-auto d-flex align-items-end pb-1">
+            <i class="bi bi-arrow-right text-muted"></i>
+          </div>
+
+          <!-- 比較先 -->
+          <div class="col-md-2">
+            <label class="form-label small text-muted mb-1">比較先 (Head)</label>
+            <select id="diff-head-select" class="form-select form-select-sm" disabled>
+              <option value="">—</option>
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <button id="diff-run-btn" class="btn btn-sm btn-primary w-100" onclick="runDiff()" disabled>
+              <i class="bi bi-search me-1"></i>比較を実行
+            </button>
+          </div>
+        </div>
+
+        <div id="diff-result">
+          <div class="text-muted small text-center py-4">ワークブックを選択して比較を実行してください</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 計算フィールド分析タブ ── -->
+    <div class="tab-pane fade" id="tab-fields">
+      <div class="card border-0 shadow-sm p-3">
+        <div class="row g-2 align-items-end mb-3">
+
+          <!-- ワークブック検索 -->
+          <div class="col-md-6">
+            <label class="form-label small text-muted mb-1">ワークブックを検索</label>
+            <div class="position-relative" id="fields-wb-wrap">
+              <input type="text" id="fields-wb-input" class="form-control form-control-sm"
+                     autocomplete="off" placeholder="— 名前またはプロジェクトで検索 —"
+                     oninput="filterWbDropdown('fields', this.value)"
+                     onfocus="showWbDropdown('fields')" />
+              <div class="wb-dropdown" id="fields-wb-dropdown"></div>
+              <input type="hidden" id="fields-wb-value" />
+            </div>
+          </div>
+
+          <div class="col-md-2">
+            <button id="fields-run-btn" class="btn btn-sm btn-primary w-100" onclick="runFields()" disabled>
+              <i class="bi bi-diagram-2 me-1"></i>分析を実行
+            </button>
+          </div>
+        </div>
+
+        <!-- フィールド一覧 -->
+        <div id="fields-table-wrap" style="display:none" class="mb-3">
+          <input type="text" id="fields-filter-input" class="form-control form-control-sm mb-2"
+                 placeholder="フィールド名・フォーミュラで絞り込み..."
+                 oninput="filterFieldsTable(this.value)" />
+          <div style="max-height:300px;overflow-y:auto;">
+            <table class="table table-sm table-hover mb-0" id="fields-table">
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th>フィールド名</th>
+                  <th>データソース</th>
+                  <th>フォーミュラ</th>
+                </tr>
+              </thead>
+              <tbody id="fields-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sankey チャート -->
+        <div id="sankey-wrap" style="display:none">
+          <h6 class="fw-bold mb-2 small text-muted text-uppercase">依存関係 Sankey チャート</h6>
+          <svg id="sankey-svg"></svg>
+        </div>
+
+        <div id="fields-result">
+          <div class="text-muted small text-center py-4">ワークブックを選択して分析を実行してください</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+<script>
+// ─────────────────────────────────────────────
+// ユーティリティ
+// ─────────────────────────────────────────────
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+async function fetchJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) {
+    const t = await r.text();
+    throw new Error(`HTTP ${r.status}: ${t}`);
+  }
+  return r.json();
+}
+
+// ─────────────────────────────────────────────
+// テーマ
+// ─────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+}
+(function() {
+  const t = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+
+// ─────────────────────────────────────────────
+// ステータス & 初期ロード
+// ─────────────────────────────────────────────
+let _wbList = [];
+
+async function pollStatus() {
+  try {
+    const s = await fetchJSON('/api/status');
+    const bar = document.getElementById('status-bar');
+    if (s.status === 'loading') {
+      bar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>ワークブック一覧を取得中...';
+      setTimeout(pollStatus, 2000);
+    } else if (s.status === 'ok') {
+      const dt = s.fetched_at ? new Date(s.fetched_at).toLocaleString() : '';
+      bar.innerHTML = `<i class="bi bi-check-circle text-success me-1"></i>${s.workbook_count}件 — ${dt}`;
+      await loadWorkbooks();
+    } else {
+      bar.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${esc(s.error)}</span>`;
+    }
+  } catch(e) {
+    setTimeout(pollStatus, 3000);
+  }
+}
+
+async function loadWorkbooks() {
+  const data = await fetchJSON('/api/workbooks');
+  _wbList = (data.workbooks || []).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+async function doRefresh() {
+  await fetch('/api/refresh', { method: 'POST' });
+  document.getElementById('status-bar').innerHTML =
+    '<span class="spinner-border spinner-border-sm me-1"></span>再取得中...';
+  setTimeout(pollStatus, 1000);
+}
+
+// ─────────────────────────────────────────────
+// 共通: ワークブック検索ドロップダウン
+// ─────────────────────────────────────────────
+function filterWbDropdown(prefix, query) {
+  const q = (query || '').toLowerCase();
+  const filtered = q ? _wbList.filter(w =>
+    w.name.toLowerCase().includes(q) || (w.project || '').toLowerCase().includes(q)
+  ) : _wbList;
+  _renderWbDropdown(prefix, filtered);
+  document.getElementById(`${prefix}-wb-value`).value = '';
+  // 対応するボタンを無効化
+  const btn = document.getElementById(`${prefix}-run-btn`);
+  if (btn) btn.disabled = true;
+}
+
+function showWbDropdown(prefix) {
+  const q = (document.getElementById(`${prefix}-wb-input`) || {}).value || '';
+  filterWbDropdown(prefix, q);
+}
+
+function _renderWbDropdown(prefix, list) {
+  const dd = document.getElementById(`${prefix}-wb-dropdown`);
+  if (!dd) return;
+  if (!list.length) {
+    dd.innerHTML = '<div class="wb-item text-muted">見つかりません</div>';
+    dd.style.display = 'block';
+    return;
+  }
+  dd.innerHTML = list.map(w =>
+    `<div class="wb-item" onmousedown="selectWb('${prefix}','${esc(w.id)}','${esc(w.name + (w.project ? ' (' + w.project + ')' : ''))}')">`+
+    `${esc(w.name)}<span class="text-muted ms-1 small">${w.project ? esc(w.project) : ''}</span></div>`
+  ).join('');
+  dd.style.display = 'block';
+}
+
+function selectWb(prefix, id, label) {
+  document.getElementById(`${prefix}-wb-input`).value = label;
+  document.getElementById(`${prefix}-wb-value`).value = id;
+  document.getElementById(`${prefix}-wb-dropdown`).style.display = 'none';
+  if (prefix === 'diff') onDiffWbSelect(id);
+  if (prefix === 'fields') {
+    document.getElementById('fields-run-btn').disabled = false;
+  }
+}
+
+document.addEventListener('click', e => {
+  ['diff', 'fields'].forEach(prefix => {
+    const wrap = document.getElementById(`${prefix}-wb-wrap`);
+    if (wrap && !wrap.contains(e.target)) {
+      const dd = document.getElementById(`${prefix}-wb-dropdown`);
+      if (dd) dd.style.display = 'none';
+    }
+  });
+});
+
+// ─────────────────────────────────────────────
+// リビジョン差分
+// ─────────────────────────────────────────────
+async function onDiffWbSelect(wbId) {
+  const baseEl = document.getElementById('diff-base-select');
+  const headEl = document.getElementById('diff-head-select');
+  const btn    = document.getElementById('diff-run-btn');
+  baseEl.innerHTML = '<option value="">—</option>';
+  headEl.innerHTML = '<option value="">—</option>';
+  baseEl.disabled = true;
+  headEl.disabled = true;
+  btn.disabled = true;
+
+  document.getElementById('diff-result').innerHTML =
+    '<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>リビジョンを取得中...</div>';
+
+  try {
+    const data = await fetchJSON(`/api/workbooks/${wbId}/revisions`);
+    const revs = data.revisions || [];
+    if (revs.length < 2) {
+      document.getElementById('diff-result').innerHTML =
+        '<div class="text-muted small text-center py-3">比較できるリビジョンが2件以上ありません</div>';
+      return;
+    }
+    const opts = revs.map(r => {
+      const dt  = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+      const cur = r.is_current ? ' ★' : '';
+      return `<option value="${r.revision_number}">v${r.revision_number}${cur} — ${dt}${r.publisher ? ' (' + esc(r.publisher) + ')' : ''}</option>`;
+    }).join('');
+    baseEl.innerHTML = opts;
+    headEl.innerHTML = opts;
+    headEl.value = revs[0].revision_number;
+    baseEl.value = revs[1].revision_number;
+    baseEl.disabled = false;
+    headEl.disabled = false;
+    btn.disabled = false;
+    document.getElementById('diff-result').innerHTML =
+      '<div class="text-muted small text-center py-3">リビジョンを選んで「比較を実行」してください</div>';
+  } catch(e) {
+    document.getElementById('diff-result').innerHTML =
+      `<div class="text-danger small text-center py-3">取得失敗: ${esc(String(e))}</div>`;
+  }
+}
+
+async function runDiff() {
+  const wbId    = document.getElementById('diff-wb-value').value;
+  const baseRev = document.getElementById('diff-base-select').value;
+  const headRev = document.getElementById('diff-head-select').value;
+  const btn     = document.getElementById('diff-run-btn');
+  if (!wbId) return;
+
+  btn.disabled = true;
+  document.getElementById('diff-result').innerHTML =
+    '<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>差分を計算中...</div>';
+
+  try {
+    const data = await fetchJSON(`/api/workbooks/${wbId}/revision-diff?base=${baseRev}&head=${headRev}`);
+    renderDiff(data);
+  } catch(e) {
+    document.getElementById('diff-result').innerHTML =
+      `<div class="text-danger small text-center py-3">差分取得失敗: ${esc(String(e))}</div>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderDiff(data) {
+  const diff = data.diff || {};
+  const bRev = data.base_revision || {};
+  const hRev = data.head_revision || {};
+
+  let html = `<div class="mb-3 small text-muted">
+    <strong>${esc(data.workbook_name)}</strong> &nbsp;
+    v${esc(bRev.revision_number)} (${esc(bRev.created_at ? new Date(bRev.created_at).toLocaleString() : '—')})
+    <i class="bi bi-arrow-right mx-1"></i>
+    v${esc(hRev.revision_number)} (${esc(hRev.created_at ? new Date(hRev.created_at).toLocaleString() : '—')})
+  </div>`;
+
+  const totalChanges =
+    (diff.calculated_fields?.added?.length || 0) +
+    (diff.calculated_fields?.deleted?.length || 0) +
+    (diff.calculated_fields?.changed?.length || 0) +
+    (diff.filters?.added?.length || 0) +
+    (diff.filters?.deleted?.length || 0) +
+    (diff.datasources?.added?.length || 0) +
+    (diff.datasources?.deleted?.length || 0) +
+    (diff.sheets?.added?.length || 0) +
+    (diff.sheets?.deleted?.length || 0);
+
+  if (totalChanges === 0) {
+    html += '<div class="text-muted small text-center py-3"><i class="bi bi-check-circle me-1 text-success"></i>このリビジョン間に変更はありません</div>';
+    document.getElementById('diff-result').innerHTML = html;
+    return;
+  }
+
+  // 計算フィールド
+  const cf = diff.calculated_fields || {};
+  if ((cf.added?.length || cf.deleted?.length || cf.changed?.length)) {
+    html += '<div class="diff-section"><h6>計算フィールド</h6>';
+    (cf.added || []).forEach(f => {
+      html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
+        <div class="formula-box formula-new">${esc(f.formula)}</div></div>`;
+    });
+    (cf.deleted || []).forEach(f => {
+      html += `<div class="diff-item"><span class="badge badge-del me-2">削除</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
+        <div class="formula-box formula-old">${esc(f.formula)}</div></div>`;
+    });
+    (cf.changed || []).forEach(f => {
+      html += `<div class="diff-item"><span class="badge badge-chg me-2">変更</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
+        <div class="formula-box formula-old">${esc(f.old_formula)}</div>
+        <div class="formula-box formula-new">${esc(f.new_formula)}</div></div>`;
+    });
+    html += '</div>';
+  }
+
+  // フィルター
+  const fl = diff.filters || {};
+  if ((fl.added?.length || fl.deleted?.length)) {
+    html += '<div class="diff-section"><h6>フィルター</h6>';
+    (fl.added || []).forEach(f => {
+      html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet)}</span></div>`;
+    });
+    (fl.deleted || []).forEach(f => {
+      html += `<div class="diff-item"><span class="badge badge-del me-2">削除</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet)}</span></div>`;
+    });
+    html += '</div>';
+  }
+
+  // データソース
+  const ds = diff.datasources || {};
+  if ((ds.added?.length || ds.deleted?.length)) {
+    html += '<div class="diff-section"><h6>データソース</h6>';
+    (ds.added || []).forEach(d => {
+      html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(d.caption || d.name)}</div>`;
+    });
+    (ds.deleted || []).forEach(d => {
+      html += `<div class="diff-item"><span class="badge badge-del me-2">削除</span>${esc(d.caption || d.name)}</div>`;
+    });
+    html += '</div>';
+  }
+
+  // シート
+  const sh = diff.sheets || {};
+  if ((sh.added?.length || sh.deleted?.length)) {
+    html += '<div class="diff-section"><h6>シート</h6>';
+    (sh.added || []).forEach(s => {
+      html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(s.name)} <span class="text-muted small">${esc(s.type)}</span></div>`;
+    });
+    (sh.deleted || []).forEach(s => {
+      html += `<div class="diff-item"><span class="badge badge-del me-2">削除</span>${esc(s.name)} <span class="text-muted small">${esc(s.type)}</span></div>`;
+    });
+    html += '</div>';
+  }
+
+  document.getElementById('diff-result').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+// 計算フィールド分析
+// ─────────────────────────────────────────────
+let _allFields = [];
+
+async function runFields() {
+  const wbId = document.getElementById('fields-wb-value').value;
+  const btn  = document.getElementById('fields-run-btn');
+  if (!wbId) return;
+
+  btn.disabled = true;
+  document.getElementById('fields-result').innerHTML =
+    '<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>解析中...</div>';
+  document.getElementById('fields-table-wrap').style.display = 'none';
+  document.getElementById('sankey-wrap').style.display = 'none';
+
+  try {
+    const data = await fetchJSON(`/api/workbooks/${wbId}/fields`);
+    _allFields = data.calculated_fields || [];
+    renderFieldsTable(_allFields);
+    renderSankey(_allFields);
+    document.getElementById('fields-result').innerHTML = '';
+  } catch(e) {
+    document.getElementById('fields-result').innerHTML =
+      `<div class="text-danger small text-center py-3">取得失敗: ${esc(String(e))}</div>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderFieldsTable(fields) {
+  const tbody = document.getElementById('fields-tbody');
+  if (!fields.length) {
+    document.getElementById('fields-table-wrap').style.display = 'none';
+    return;
+  }
+  tbody.innerHTML = fields.map(f =>
+    `<tr><td>${esc(f.field)}</td><td class="text-muted small">${esc(f.datasource)}</td>
+     <td><code class="small">${esc(f.formula)}</code></td></tr>`
+  ).join('');
+  document.getElementById('fields-table-wrap').style.display = 'block';
+}
+
+function filterFieldsTable(query) {
+  const q = query.toLowerCase();
+  const filtered = q ? _allFields.filter(f =>
+    f.field.toLowerCase().includes(q) || f.formula.toLowerCase().includes(q)
+  ) : _allFields;
+  renderFieldsTable(filtered);
+}
+
+function renderSankey(fields) {
+  const svg = document.getElementById('sankey-svg');
+  svg.innerHTML = '';
+  if (!fields.length) {
+    document.getElementById('sankey-wrap').style.display = 'none';
+    return;
+  }
+
+  // 依存関係を抽出: formula 内に他のフィールド名 [...] が含まれるか
+  const fieldNames = new Set(fields.map(f => f.field));
+  const links = [];
+  const nodeSet = new Set();
+
+  fields.forEach(f => {
+    nodeSet.add(f.field);
+    const refs = [...f.formula.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]);
+    refs.forEach(ref => {
+      if (fieldNames.has(ref) && ref !== f.field) {
+        nodeSet.add(ref);
+        links.push({ source: ref, target: f.field, value: 1 });
+      }
+    });
+  });
+
+  if (!links.length) {
+    document.getElementById('sankey-wrap').style.display = 'none';
+    return;
+  }
+
+  const nodes = [...nodeSet].map(name => ({ name }));
+  const nodeIndex = Object.fromEntries(nodes.map((n, i) => [n.name, i]));
+  const sankeyLinks = links.map(l => ({
+    source: nodeIndex[l.source],
+    target: nodeIndex[l.target],
+    value:  l.value,
+  }));
+
+  const W = svg.parentElement.clientWidth || 800;
+  const H = Math.max(300, nodes.length * 22);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('height', H);
+
+  const sankey = d3.sankey()
+    .nodeWidth(12)
+    .nodePadding(10)
+    .extent([[16, 16], [W - 160, H - 16]]);
+
+  const graph = sankey({ nodes: nodes.map(d => ({ ...d })), links: sankeyLinks });
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const color  = d3.scaleOrdinal(d3.schemeTableau10);
+  const s = d3.select(svg);
+
+  // リンク
+  s.append('g').selectAll('path')
+    .data(graph.links)
+    .join('path')
+    .attr('class', 'sankey-link')
+    .attr('d', d3.sankeyLinkHorizontal())
+    .attr('stroke', d => color(d.source.name))
+    .attr('stroke-width', d => Math.max(1, d.width));
+
+  // ノード
+  const node = s.append('g').selectAll('g')
+    .data(graph.nodes)
+    .join('g');
+
+  node.append('rect')
+    .attr('x', d => d.x0).attr('y', d => d.y0)
+    .attr('width', d => d.x1 - d.x0)
+    .attr('height', d => Math.max(1, d.y1 - d.y0))
+    .attr('fill', d => color(d.name))
+    .attr('rx', 3);
+
+  node.append('text')
+    .attr('x', d => d.x1 + 4)
+    .attr('y', d => (d.y0 + d.y1) / 2)
+    .attr('dy', '0.35em')
+    .attr('font-size', 11)
+    .attr('fill', isDark ? '#cfe2ff' : '#1a2a3a')
+    .text(d => d.name);
+
+  document.getElementById('sankey-wrap').style.display = 'block';
+}
+
+// ─────────────────────────────────────────────
+// 起動
+// ─────────────────────────────────────────────
+pollStatus();
+</script>
+</body>
+</html>
