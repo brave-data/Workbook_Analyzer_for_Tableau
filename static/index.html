@@ -59,13 +59,18 @@
   [data-theme="dark"] .badge-chg { background: #78350f; color: #fcd34d; }
 
   .diff-section { margin-bottom: .75rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-  .diff-section-header { font-size: .85rem; font-weight: 700; color: var(--text-muted2); text-transform: uppercase; letter-spacing: .05em; margin: 0; padding: 7px 10px; background: var(--bg); }
+  .diff-section-header { font-size: .85rem; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .05em; margin: 0; padding: 7px 10px; background: var(--bg); }
   .diff-section-header:hover { background: var(--border); }
-  .diff-section-body { padding: 8px; }
-  .diff-item { font-size: .82rem; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; background: var(--bg); }
-  .formula-box { font-family: monospace; font-size: .78rem; background: var(--bg); border-radius: 4px; padding: 4px 8px; margin-top: 4px; word-break: break-all; }
-  .formula-old { color: #dc3545; text-decoration: line-through; }
-  .formula-new { color: #198754; }
+  .diff-section-body { padding: 8px; background: var(--card-bg); }
+  .diff-item { font-size: .82rem; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; background: var(--bg); color: var(--text); }
+  .diff-item .text-muted { color: var(--text-muted2) !important; }
+  .formula-box { font-family: monospace; font-size: .78rem; border-radius: 4px; padding: 4px 8px; margin-top: 4px; word-break: break-all; }
+  .formula-old { background: #fff0f0; color: #c0392b; text-decoration: line-through; }
+  .formula-new { background: #f0fff4; color: #1a7a3c; }
+  [data-theme="dark"] .formula-old { background: #3d1010; color: #ff8080; }
+  [data-theme="dark"] .formula-new { background: #0d2e18; color: #5ddb7a; }
+  [data-theme="dark"] .diff-item    { background: #1a2d3f; }
+  [data-theme="dark"] .diff-section-body { background: #162230; }
 
   /* Sankey */
   #sankey-svg { width: 100%; overflow: visible; }
@@ -468,11 +473,11 @@ function renderDiff(data) {
   const _revLabel = r => {
     const dt  = r.created_at ? new Date(r.created_at).toLocaleString() : '—';
     const pub = r.publisher  ? ` (${esc(r.publisher)})`                : '';
-    return `v${esc(r.revision_number)} &nbsp;<span class="text-muted">${dt}${pub}</span>`;
+    return `v${esc(r.revision_number)} &nbsp;<span style="color:var(--text-muted2)">${dt}${pub}</span>`;
   };
 
-  let html = `<div class="mb-3 small">${_revLabel(bRev)}
-    <i class="bi bi-arrow-right mx-2 text-muted"></i>${_revLabel(hRev)}</div>`;
+  let html = `<div class="mb-3 small" style="color:var(--text)">${_revLabel(bRev)}
+    <i class="bi bi-arrow-right mx-2" style="color:var(--text-muted2)"></i>${_revLabel(hRev)}</div>`;
 
   const totalChanges =
     (diff.calculated_fields?.added?.length || 0) +
