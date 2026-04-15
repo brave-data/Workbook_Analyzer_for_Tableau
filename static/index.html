@@ -20,41 +20,49 @@
     --badge-chg:  #fd7e14;
   }
   [data-theme="dark"] {
-    --bg:         #0f1923;
-    --card-bg:    #162230;
-    --text:       #cfe2ff;
-    --text-muted2:#5a7a9a;
-    --border:     #1e3448;
-    --nav-bg:     #0a1520;
-    --nav-text:   #80b0d0;
+    --bg:         #111c27;
+    --card-bg:    #1c2e40;
+    --text:       #dceeff;
+    --text-muted2:#7aa8cc;
+    --border:     #2e4a62;
+    --nav-bg:     #0c1822;
+    --nav-text:   #90c4e8;
   }
-  body            { background: var(--bg); color: var(--text); transition: background .2s, color .2s; }
-  .card           { background: var(--card-bg); border-color: var(--border) !important; }
-  .navbar         { background: var(--nav-bg) !important; }
+  body  { background: var(--bg); color: var(--text); transition: background .2s, color .2s; }
+  .card { background: var(--card-bg); border-color: var(--border) !important; }
+  [data-theme="dark"] .card { box-shadow: 0 2px 12px rgba(0,0,0,.4) !important; }
+  .navbar { background: var(--nav-bg) !important; }
   .navbar .nav-link { color: var(--nav-text) !important; }
   .nav-tabs .nav-link       { color: var(--text) !important; opacity: .7; }
   .nav-tabs .nav-link.active{ color: var(--text) !important; opacity: 1; font-weight: 600; border-bottom: 2px solid #4da6ff; }
+  [data-theme="dark"] .nav-tabs { border-color: var(--border); }
 
   /* フォームコントロール ダークモード */
   [data-theme="dark"] .form-control,
   [data-theme="dark"] .form-select {
-    background-color: #1e2d3d;
-    border-color: #2a4060;
-    color: #cfe2ff;
+    background-color: #243648;
+    border-color: #3a5878;
+    color: #dceeff;
   }
-  [data-theme="dark"] .form-control::placeholder { color: #5a7a9a; }
+  [data-theme="dark"] .form-control::placeholder { color: #6a90b0; }
   [data-theme="dark"] .form-control:focus,
   [data-theme="dark"] .form-select:focus {
-    background-color: #1e2d3d;
+    background-color: #243648;
     border-color: #4da6ff;
-    color: #cfe2ff;
-    box-shadow: 0 0 0 .2rem rgba(77,166,255,.2);
+    color: #dceeff;
+    box-shadow: 0 0 0 .2rem rgba(77,166,255,.25);
   }
-  [data-theme="dark"] .form-select option { background: #1e2d3d; color: #cfe2ff; }
-  [data-theme="dark"] .table-light { --bs-table-bg: #162230; --bs-table-color: #cfe2ff; }
-  [data-theme="dark"] .table { color: #cfe2ff; border-color: #1e3448; }
-  [data-theme="dark"] .table-hover > tbody > tr:hover > * { background-color: #1e3448; }
-  [data-theme="dark"] .sticky-top { background: #162230 !important; color: #8cb8d8; }
+  [data-theme="dark"] .form-select option  { background: #1c2e40; color: #dceeff; }
+  [data-theme="dark"] .table-light         { --bs-table-bg: #1c2e40; --bs-table-color: #dceeff; }
+  [data-theme="dark"] .table               { color: #dceeff; border-color: #2e4a62; }
+  [data-theme="dark"] .table-hover > tbody > tr:hover > * { background-color: #243648; }
+  [data-theme="dark"] .sticky-top          { background: #1c2e40 !important; color: #90b8d8; }
+  [data-theme="dark"] .btn-outline-secondary {
+    color: #90b8d8; border-color: #3a5878;
+  }
+  [data-theme="dark"] .btn-outline-secondary:hover {
+    background: #243648; color: #dceeff;
+  }
 
   /* 検索ドロップダウン */
   .wb-dropdown {
@@ -90,8 +98,9 @@
   .formula-new { background: #f0fff4; color: #1a7a3c; }
   [data-theme="dark"] .formula-old { background: #3d1010; color: #ff8080; }
   [data-theme="dark"] .formula-new { background: #0d2e18; color: #5ddb7a; }
-  [data-theme="dark"] .diff-item    { background: #1a2d3f; }
-  [data-theme="dark"] .diff-section-body { background: #162230; }
+  [data-theme="dark"] .diff-item         { background: #243648; }
+  [data-theme="dark"] .diff-section-body { background: #1c2e40; }
+  [data-theme="dark"] .diff-section      { border-color: #2e4a62; }
 
   /* Sankey */
   #sankey-svg { width: 100%; overflow: visible; }
