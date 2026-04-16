@@ -35,6 +35,23 @@
   .nav-tabs .nav-link       { color: var(--text) !important; opacity: .7; }
   .nav-tabs .nav-link.active{ color: var(--text) !important; opacity: 1; font-weight: 600; border-bottom: 2px solid #4da6ff; }
 
+  /* フォームコントロール ダークモード */
+  [data-theme="dark"] .form-control,
+  [data-theme="dark"] .form-select {
+    background-color: #1a2d3f;
+    border-color: #2a4060;
+    color: #cfe2ff;
+  }
+  [data-theme="dark"] .form-control::placeholder { color: #5a7a9a; }
+  [data-theme="dark"] .form-control:focus,
+  [data-theme="dark"] .form-select:focus {
+    background-color: #1a2d3f;
+    border-color: #4da6ff;
+    color: #cfe2ff;
+    box-shadow: 0 0 0 .2rem rgba(77,166,255,.2);
+  }
+  [data-theme="dark"] .form-select option { background: #1a2d3f; color: #cfe2ff; }
+
   /* 検索ドロップダウン */
   .wb-dropdown {
     display: none; position: absolute; z-index: 1050; width: 100%;
