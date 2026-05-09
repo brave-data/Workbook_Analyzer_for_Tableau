@@ -173,6 +173,7 @@
 <nav class="navbar navbar-expand-lg px-3 py-2">
   <span class="navbar-brand text-white">
     <i class="bi bi-diagram-3 me-2" style="color:var(--tc-sky)"></i>Workbook Analyzer for Tableau
+    <span id="app-version" class="badge bg-secondary ms-1" style="font-size:0.62rem;font-weight:400;opacity:0.75;vertical-align:middle"></span>
   </span>
   <div class="ms-auto d-flex align-items-center gap-2">
     <span id="status-bar" class="text-white-50 small"></span>
@@ -390,6 +391,10 @@ async function pollStatus() {
     } else if (s.status === 'ok') {
       const dt = s.fetched_at ? new Date(s.fetched_at).toLocaleString() : '';
       bar.innerHTML = `<i class="bi bi-check-circle text-success me-1"></i>${s.workbook_count}件 — ${dt}`;
+      if (s.version) {
+        const vEl = document.getElementById('app-version');
+        if (vEl) vEl.textContent = `v${s.version}`;
+      }
       await loadWorkbooks();
     } else {
       bar.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${esc(s.error)}</span>`;
