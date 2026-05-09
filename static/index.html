@@ -8,65 +8,98 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 <style>
   :root {
-    --bg:         #f4f6fb;
-    --card-bg:    #ffffff;
-    --text:       #1a2a3a;
-    --text-muted2:#7a8fa6;
-    --border:     #dee2e6;
-    --nav-bg:     #1a2a3a;
-    --nav-text:   #cfe2ff;
+    --tc-blue:        #001942;
+    --tc-mid:         #2F5B94;
+    --tc-sky:         #4C9AED;
+    --tc-light:       #EBF3FD;
+
+    --bg-page:        #f0f4f8;
+    --bg-card:        #ffffff;
+    --bg-detail:      #f8fafd;
+    --text-body:      #212529;
+    --text-muted2:    #6c757d;
+    --text-secondary2:#495057;
+    --border-subtle:  #e9ecef;
+    --card-shadow:    0 2px 8px rgba(0,25,66,.08);
+
     --badge-add:  #198754;
     --badge-del:  #dc3545;
     --badge-chg:  #fd7e14;
   }
   [data-theme="dark"] {
-    --bg:         #0f1923;
-    --card-bg:    #162230;
-    --text:       #cfe2ff;
-    --text-muted2:#5a7a9a;
-    --border:     #1e3448;
-    --nav-bg:     #0a1520;
-    --nav-text:   #80b0d0;
+    --bg-page:        #0f1624;
+    --bg-card:        #1a2540;
+    --bg-detail:      #162035;
+    --text-body:      #ffffff;
+    --text-muted2:    #a0b8d8;
+    --text-secondary2:#c0d0e8;
+    --border-subtle:  #2a3a55;
+    --card-shadow:    0 2px 8px rgba(0,0,0,.5);
   }
-  body            { background: var(--bg); color: var(--text); transition: background .2s, color .2s; }
-  .card           { background: var(--card-bg); border-color: var(--border) !important; }
-  .navbar         { background: var(--nav-bg) !important; }
-  .navbar .nav-link { color: var(--nav-text) !important; }
-  .nav-tabs .nav-link       { color: var(--text) !important; opacity: .7; }
-  .nav-tabs .nav-link.active{ color: var(--text) !important; opacity: 1; font-weight: 600; border-bottom: 2px solid #4da6ff; }
-  [data-theme="dark"] .nav-tabs .nav-link        { border-color: transparent; background: transparent; }
-  [data-theme="dark"] .nav-tabs .nav-link.active { background: var(--card-bg) !important; border-color: var(--border) var(--border) var(--card-bg); }
 
-  /* フォームコントロール ダークモード */
+  body  { background: var(--bg-page); color: var(--text-body); font-size: 14px; transition: background .25s, color .25s; }
+  .card { background: var(--bg-card); border-color: var(--border-subtle) !important; box-shadow: var(--card-shadow); }
+
+  /* Navbar */
+  .navbar { background: var(--tc-blue) !important; }
+  .navbar-brand { font-weight: 700; font-size: 1.05rem; letter-spacing: .4px; }
+
+  /* Tabs */
+  .nav-tabs .nav-link         { color: var(--tc-mid) !important; font-weight: 500; border-color: transparent !important; background: transparent !important; }
+  .nav-tabs .nav-link.active  { color: #fff !important; background: var(--tc-mid) !important; border-color: var(--tc-mid) !important; }
+  [data-theme="dark"] .nav-tabs { border-color: var(--border-subtle); }
+  [data-theme="dark"] .nav-tabs .nav-link        { color: #7eaee8 !important; border-color: transparent !important; background: transparent !important; }
+  [data-theme="dark"] .nav-tabs .nav-link.active { color: #fff !important; background: var(--tc-mid) !important; border-color: var(--tc-mid) !important; }
+
+  /* フォームコントロール */
   [data-theme="dark"] .form-control,
   [data-theme="dark"] .form-select {
-    background-color: #1a2d3f;
-    border-color: #2a4060;
-    color: #cfe2ff;
+    background: #1e2a42; color: var(--text-body); border-color: var(--border-subtle);
   }
-  [data-theme="dark"] .form-control::placeholder { color: #5a7a9a; }
+  [data-theme="dark"] .form-control::placeholder { color: var(--text-muted2); }
   [data-theme="dark"] .form-control:focus,
   [data-theme="dark"] .form-select:focus {
-    background-color: #1a2d3f;
-    border-color: #4da6ff;
-    color: #cfe2ff;
-    box-shadow: 0 0 0 .2rem rgba(77,166,255,.2);
+    background: #1e2a42; border-color: var(--tc-sky); color: var(--text-body);
+    box-shadow: 0 0 0 .2rem rgba(76,154,237,.2);
   }
-  [data-theme="dark"] .form-select option { background: #1a2d3f; color: #cfe2ff; }
+  [data-theme="dark"] .form-select option { background: #1e2a42; color: var(--text-body); }
+
+  /* テーブル */
+  .table thead th { background: var(--tc-blue); color: #fff; white-space: nowrap; }
+  .table-hover tbody tr:hover { background: var(--tc-light); }
+  [data-theme="dark"] .table {
+    --bs-table-bg: var(--bg-card);
+    --bs-table-hover-bg: #1e2e50;
+    --bs-table-color: var(--text-body);
+    --bs-table-border-color: var(--border-subtle);
+  }
+  [data-theme="dark"] .table > :not(caption) > * > * {
+    background-color: var(--bg-card) !important;
+    color: var(--text-body) !important;
+    border-color: var(--border-subtle) !important;
+  }
+  [data-theme="dark"] .table-hover > tbody > tr:hover > * { background-color: #1e2e50 !important; }
+
+  /* ダークモード汎用 */
+  [data-theme="dark"] .text-muted     { color: var(--text-muted2) !important; }
+  [data-theme="dark"] .text-secondary { color: var(--text-secondary2) !important; }
+  [data-theme="dark"] .badge.bg-secondary { background: #3a4d6a !important; color: #fff !important; }
+  [data-theme="dark"] code  { color: var(--text-muted2); background: transparent; }
+  [data-theme="dark"] small { color: var(--text-muted2); }
 
   /* 検索ドロップダウン */
   .wb-dropdown {
     display: none; position: absolute; z-index: 1050; width: 100%;
     max-height: 240px; overflow-y: auto;
-    background: var(--card-bg); border: 1px solid var(--border);
+    background: var(--bg-card); border: 1px solid var(--border-subtle);
     border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,.15);
   }
   .wb-item {
     padding: 8px 12px; cursor: pointer; font-size: .85rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-subtle); color: var(--text-body);
   }
   .wb-item:last-child { border-bottom: none; }
-  .wb-item:hover { background: #e8f0fe; }
+  .wb-item:hover { background: var(--tc-light); }
   [data-theme="dark"] .wb-item:hover { background: #1e3448; }
 
   /* 差分バッジ */
@@ -77,28 +110,60 @@
   [data-theme="dark"] .badge-del { background: #7f1d1d; color: #fca5a5; }
   [data-theme="dark"] .badge-chg { background: #78350f; color: #fcd34d; }
 
-  .diff-section { margin-bottom: .75rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-  .diff-section-header { font-size: .85rem; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .05em; margin: 0; padding: 7px 10px; background: var(--bg); }
-  .diff-section-header:hover { background: var(--border); }
-  .diff-section-body { padding: 8px; background: var(--card-bg); }
-  .diff-item { font-size: .82rem; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; background: var(--bg); color: var(--text); }
+  .diff-section { margin-bottom: .75rem; border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; }
+  .diff-section-header {
+    font-size: .85rem; font-weight: 700; color: var(--text-body);
+    text-transform: uppercase; letter-spacing: .05em; margin: 0;
+    padding: 8px 12px; background: var(--bg-page); cursor: pointer; user-select: none;
+    display: flex; align-items: center;
+  }
+  .diff-section-header:hover { background: var(--border-subtle); }
+  [data-theme="dark"] .diff-section-header { background: var(--bg-detail); }
+  [data-theme="dark"] .diff-section-header:hover { background: #1e2e50; }
+  .diff-section-body { padding: 8px; background: var(--bg-card); }
+  .diff-item { font-size: .82rem; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; background: var(--bg-page); color: var(--text-body); }
   .diff-item .text-muted { color: var(--text-muted2) !important; }
   .formula-box { font-family: monospace; font-size: .78rem; border-radius: 4px; padding: 4px 8px; margin-top: 4px; word-break: break-all; }
   .formula-old { background: #fff0f0; color: #c0392b; text-decoration: line-through; }
   .formula-new { background: #f0fff4; color: #1a7a3c; }
   [data-theme="dark"] .formula-old { background: #3d1010; color: #ff8080; }
   [data-theme="dark"] .formula-new { background: #0d2e18; color: #5ddb7a; }
-  [data-theme="dark"] .diff-item    { background: #1a2d3f; }
-  [data-theme="dark"] .diff-section-body { background: #162230; }
+  [data-theme="dark"] .diff-item    { background: #162035; }
+
+  /* コピーボタン */
+  .copy-formula-btn { opacity: 0; transition: opacity .15s; }
+  tr:hover .copy-formula-btn, .copy-formula-btn:focus { opacity: 1; }
+  .copy-formula-btn.copied { color: #27ae60 !important; border-color: #27ae60 !important; }
 
   /* Sankey */
-  #sankey-svg { width: 100%; overflow: visible; }
-  .sankey-link { fill: none; stroke-opacity: .3; }
-  .sankey-link:hover { stroke-opacity: .6; }
-  .sankey-node rect { rx: 4; }
+  #sankey-container { position: relative; width: 100%; min-height: 400px; overflow: visible; }
+
+  /* Sankey ツールチップ（CSSクラスでテーマ対応） */
+  .sankey-tooltip {
+    position: absolute;
+    background: rgba(255,255,255,0.97);
+    color: #222;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    padding: 9px 12px;
+    font-size: 12px;
+    pointer-events: none;
+    display: none;
+    white-space: pre-wrap;
+    max-width: 380px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    z-index: 100;
+  }
+  [data-theme="dark"] .sankey-tooltip {
+    background: rgba(14,24,48,0.97);
+    color: #dce8ff;
+    border-color: rgba(80,140,220,0.35);
+    box-shadow: 0 4px 20px rgba(0,0,0,.6);
+  }
+  [data-theme="dark"] .sankey-tooltip hr { border-color: rgba(80,140,220,0.25); }
 
   /* ステータスバー */
-  #status-bar { font-size: .78rem; padding: 4px 12px; }
+  #status-bar { font-size: .78rem; }
   .spinner-border-sm { width: 1rem; height: 1rem; }
 </style>
 </head>
@@ -106,22 +171,22 @@
 
 <!-- ナビゲーション -->
 <nav class="navbar navbar-expand-lg px-3 py-2">
-  <span class="navbar-brand text-white fw-bold fs-6">
-    <i class="bi bi-diagram-3 me-2 text-info"></i>Workbook Analyzer for Tableau
+  <span class="navbar-brand text-white">
+    <i class="bi bi-diagram-3 me-2" style="color:var(--tc-sky)"></i>Workbook Analyzer for Tableau
   </span>
   <div class="ms-auto d-flex align-items-center gap-2">
-    <span id="status-bar" class="text-secondary"></span>
-    <button class="btn btn-sm btn-outline-secondary" onclick="doRefresh()" title="ワークブック一覧を再取得">
+    <span id="status-bar" class="text-white-50 small"></span>
+    <button class="btn btn-sm btn-outline-light px-2" onclick="doRefresh()" title="ワークブック一覧を再取得">
       <i class="bi bi-arrow-clockwise"></i>
     </button>
-    <button class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()" title="ダークモード切替">
+    <button class="btn btn-sm btn-outline-light px-2" onclick="toggleTheme()" title="ダークモード切替">
       <i class="bi bi-moon-stars-fill"></i>
     </button>
   </div>
 </nav>
 
 <!-- タブ -->
-<div class="container-fluid px-3 pt-3">
+<div class="container-fluid px-3 pt-3 pb-5">
   <ul class="nav nav-tabs mb-3" id="mainTabs">
     <li class="nav-item">
       <a class="nav-link active" data-bs-toggle="tab" href="#tab-diff">
@@ -213,30 +278,37 @@
             </div>
           </div>
 
-          <div class="col-md-2">
-            <button id="fields-run-btn" class="btn btn-sm btn-primary w-100" onclick="runFields()" disabled>
+          <div class="col-auto">
+            <button id="fields-run-btn" class="btn btn-sm btn-primary" onclick="runFields()" disabled>
               <i class="bi bi-diagram-2 me-1"></i>分析を実行
             </button>
           </div>
         </div>
 
+        <!-- データソース情報パネル（動的挿入） -->
+
         <!-- フィールド一覧 -->
         <div id="fields-table-wrap" style="display:none" class="mb-3">
-          <div class="d-flex gap-2 mb-2">
-            <input type="text" id="fields-filter-input" class="form-control form-control-sm"
-                   placeholder="フィールド名・フォーミュラで絞り込み..."
-                   oninput="filterFieldsTable(this.value)" />
-            <button class="btn btn-sm btn-outline-secondary flex-shrink-0" onclick="downloadFieldsCSV()" title="CSVをダウンロード">
-              <i class="bi bi-download"></i>
-            </button>
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="fw-bold mb-0" style="color:var(--tc-mid)">
+              <i class="bi bi-table me-1"></i>計算フィールド一覧
+            </h6>
+            <div class="d-flex gap-2">
+              <input type="text" id="fields-filter-input" class="form-control form-control-sm"
+                     style="width:220px" placeholder="フィールド名・フォーミュラで絞り込み..."
+                     oninput="filterFieldsTable(this.value)" />
+              <button class="btn btn-sm btn-outline-secondary flex-shrink-0" onclick="downloadFieldsCSV()" title="CSVをダウンロード">
+                <i class="bi bi-download"></i>
+              </button>
+            </div>
           </div>
-          <div style="max-height:300px;overflow-y:auto;">
+          <div style="max-height:320px;overflow-y:auto;">
             <table class="table table-sm table-hover mb-0" id="fields-table">
-              <thead class="table-light sticky-top">
+              <thead class="sticky-top">
                 <tr>
-                  <th>フィールド名</th>
                   <th>データソース</th>
-                  <th>フォーミュラ</th>
+                  <th>フィールド名</th>
+                  <th>計算式（抜粋）</th>
                 </tr>
               </thead>
               <tbody id="fields-tbody"></tbody>
@@ -246,8 +318,11 @@
 
         <!-- Sankey チャート -->
         <div id="sankey-wrap" style="display:none">
-          <h6 class="fw-bold mb-2 small text-muted text-uppercase">依存関係 Sankey チャート</h6>
-          <svg id="sankey-svg"></svg>
+          <h6 class="fw-bold mb-1" style="color:var(--tc-mid)">
+            <i class="bi bi-share me-1"></i>フィールド依存関係図
+          </h6>
+          <p class="text-muted small mb-2">ノード色はデータソース別。リンクにホバーすると計算式を確認できます。</p>
+          <div id="sankey-container"></div>
         </div>
 
         <div id="fields-result">
@@ -263,6 +338,15 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
 <script>
+// ─────────────────────────────────────────────
+// 定数
+// ─────────────────────────────────────────────
+const DS_PALETTE = [
+  '#2e75b6', '#70ad47', '#ed7d31', '#7030a0',
+  '#c00000', '#4472c4', '#00b0f0', '#ffc000',
+  '#00b050', '#ff0000',
+];
+
 // ─────────────────────────────────────────────
 // ユーティリティ
 // ─────────────────────────────────────────────
@@ -337,7 +421,6 @@ function filterWbDropdown(prefix, query) {
   ) : _wbList;
   _renderWbDropdown(prefix, filtered);
   document.getElementById(`${prefix}-wb-value`).value = '';
-  // 対応するボタンを無効化
   const btn = document.getElementById(`${prefix}-run-btn`);
   if (btn) btn.disabled = true;
 }
@@ -387,7 +470,6 @@ function clearWbSearch(prefix) {
   if (val) val.value = '';
   if (btn) btn.style.display = 'none';
   filterWbDropdown(prefix, '');
-  // 対応するボタンを無効化
   const runBtn = document.getElementById(`${prefix}-run-btn`);
   if (runBtn) runBtn.disabled = true;
   if (prefix === 'diff') {
@@ -492,10 +574,11 @@ function renderDiff(data) {
   const _revLabel = r => {
     const dt  = r.created_at ? new Date(r.created_at).toLocaleString() : '—';
     const pub = r.publisher  ? ` (${esc(r.publisher)})`                : '';
-    return `v${esc(r.revision_number)} &nbsp;<span style="color:var(--text-muted2)">${dt}${pub}</span>`;
+    return `<strong>v${esc(r.revision_number)}</strong>&nbsp;<span style="color:var(--text-muted2)">${dt}${pub}</span>`;
   };
 
-  let html = `<div class="mb-3 small" style="color:var(--text)">${_revLabel(bRev)}
+  let html = `<div class="mb-3 small p-2 rounded" style="background:var(--bg-detail);border:1px solid var(--border-subtle)">
+    ${_revLabel(bRev)}
     <i class="bi bi-arrow-right mx-2" style="color:var(--text-muted2)"></i>${_revLabel(hRev)}</div>`;
 
   const totalChanges =
@@ -515,18 +598,17 @@ function renderDiff(data) {
     return;
   }
 
-  /** セクション折りたたみ付きヘッダーを生成 */
   function _sectionHeader(key, label, added, deleted, changed) {
-    const open   = _diffSectionOpen[key];
-    const chev   = open ? 'bi-chevron-up' : 'bi-chevron-down';
-    let badges   = '';
+    const open = _diffSectionOpen[key];
+    const chev = open ? 'bi-chevron-up' : 'bi-chevron-down';
+    let badges = '';
     if (added)   badges += `<span class="badge badge-add ms-1">+${added}</span>`;
     if (deleted) badges += `<span class="badge badge-del ms-1">-${deleted}</span>`;
     if (changed) badges += `<span class="badge badge-chg ms-1">~${changed}</span>`;
     if (!added && !deleted && !changed)
       badges = '<span class="badge bg-secondary ms-1">変更なし</span>';
-    return `<h6 class="diff-section-header" onclick="toggleDiffSection('${key}')" style="cursor:pointer;user-select:none">
-      <i class="bi ${chev} me-1 small"></i>${label}${badges}</h6>`;
+    return `<div class="diff-section-header" onclick="toggleDiffSection('${key}')">
+      <i class="bi ${chev} me-1 small"></i><span>${label}</span>${badges}</div>`;
   }
 
   // 計算フィールド
@@ -625,15 +707,28 @@ async function runFields() {
     const data = await fetchJSON(`/api/workbooks/${wbId}/fields`);
     _allFields = data.calculated_fields || [];
 
-    // データソース情報パネル
+    // データソース情報パネル（色付きカード）
     const datasources = data.datasources || [];
     if (datasources.length) {
+      const dsNames  = [...new Set(_allFields.map(f => f.datasource))];
+      const dsColors = Object.fromEntries(dsNames.map((n, i) => [n, DS_PALETTE[i % DS_PALETTE.length]]));
+
       const panel = document.createElement('div');
       panel.id = 'fields-ds-panel';
-      panel.className = 'mb-3 p-2 rounded small';
-      panel.style.background = 'var(--bg)';
-      panel.innerHTML = '<span class="fw-bold text-muted me-2"><i class="bi bi-database me-1"></i>データソース</span>' +
-        datasources.map(d => `<span class="badge bg-secondary me-1">${esc(d.caption || d.name)}</span>`).join('');
+      panel.className = 'mb-3';
+      panel.innerHTML =
+        `<div class="mb-2 fw-bold small" style="color:var(--text-secondary2)">
+           <i class="bi bi-database me-1"></i>使用データソース（${datasources.length}件）
+         </div>
+         <div class="d-flex flex-wrap gap-2">` +
+        datasources.map(d => {
+          const color = dsColors[d.caption || d.name] || dsColors[d.name] || '#aaa';
+          return `<div class="card border-0 px-3 py-2" style="border-left:4px solid ${color}!important;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:160px">
+            <div class="fw-semibold small" style="color:${color}">
+              <i class="bi bi-database-fill me-1"></i>${esc(d.caption || d.name)}
+            </div>
+          </div>`;
+        }).join('') + '</div>';
       document.getElementById('fields-table-wrap').before(panel);
     }
 
@@ -654,10 +749,28 @@ function renderFieldsTable(fields) {
     document.getElementById('fields-table-wrap').style.display = 'none';
     return;
   }
-  tbody.innerHTML = fields.map(f =>
-    `<tr><td>${esc(f.field)}</td><td class="text-muted small">${esc(f.datasource)}</td>
-     <td><code class="small">${esc(f.formula)}</code></td></tr>`
-  ).join('');
+  const dsNames  = [...new Set(_allFields.map(f => f.datasource))];
+  const dsColors = Object.fromEntries(dsNames.map((n, i) => [n, DS_PALETTE[i % DS_PALETTE.length]]));
+
+  tbody.innerHTML = fields.map(f => {
+    const color   = dsColors[f.datasource] || '#aaa';
+    const preview = f.formula.length > 80 ? esc(f.formula.slice(0, 80)) + '…' : esc(f.formula);
+    return `<tr>
+      <td><span class="badge" style="background:${color}">${esc(f.datasource)}</span></td>
+      <td class="fw-semibold">${esc(f.field)}</td>
+      <td>
+        <div class="d-flex align-items-start gap-1">
+          <code class="small text-muted flex-grow-1">${preview}</code>
+          <button class="btn btn-sm p-0 px-1 btn-outline-secondary copy-formula-btn"
+                  data-formula="${esc(f.formula)}" title="計算式をコピー"
+                  style="font-size:0.7rem;line-height:1.4;flex-shrink:0"
+                  onclick="event.stopPropagation();copyFormula(this)">
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
   document.getElementById('fields-table-wrap').style.display = 'block';
 }
 
@@ -669,87 +782,242 @@ function filterFieldsTable(query) {
   renderFieldsTable(filtered);
 }
 
+// コピーボタン
+function copyFormula(btn) {
+  const formula = btn.dataset.formula;
+  function onCopied() {
+    btn.classList.add('copied');
+    btn.innerHTML = '<i class="bi bi-check2"></i>';
+    setTimeout(() => {
+      if (window._sankeyTooltipUnpin) window._sankeyTooltipUnpin();
+      btn.classList.remove('copied');
+      btn.innerHTML = '<i class="bi bi-clipboard"></i>';
+    }, 800);
+  }
+  navigator.clipboard.writeText(formula).then(onCopied).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = formula; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    onCopied();
+  });
+}
+
+// ─────────────────────────────────────────────
+// Sankey 依存関係図（ツールチップ付き）
+// ─────────────────────────────────────────────
 function renderSankey(fields) {
-  const svg = document.getElementById('sankey-svg');
-  svg.innerHTML = '';
+  // コンテナをクリア
+  d3.select('#sankey-container').selectAll('*').remove();
+
   if (!fields.length) {
     document.getElementById('sankey-wrap').style.display = 'none';
     return;
   }
 
-  // 依存関係を抽出: formula 内に他のフィールド名 [...] が含まれるか
+  // エッジ生成（formula = target フィールドの formula）
   const fieldNames = new Set(fields.map(f => f.field));
-  const links = [];
-  const nodeSet = new Set();
+  const fieldMap   = Object.fromEntries(fields.map(f => [f.field, f]));
+  const edgesMap   = {};
 
   fields.forEach(f => {
-    nodeSet.add(f.field);
     const refs = [...f.formula.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]);
     refs.forEach(ref => {
-      if (fieldNames.has(ref) && ref !== f.field) {
-        nodeSet.add(ref);
-        links.push({ source: ref, target: f.field, value: 1 });
+      if (!fieldNames.has(ref) || ref === f.field) return;
+      const key = `${ref}->${f.field}`;
+      if (!edgesMap[key]) {
+        edgesMap[key] = { source: ref, target: f.field, weight: 1, formula: f.formula, datasource: f.datasource };
+      } else {
+        edgesMap[key].weight++;
       }
     });
   });
 
-  if (!links.length) {
+  const edges = Object.values(edgesMap);
+  if (!edges.length) {
     document.getElementById('sankey-wrap').style.display = 'none';
     return;
   }
 
-  const nodes = [...nodeSet].map(name => ({ name }));
-  const nodeIndex = Object.fromEntries(nodes.map((n, i) => [n.name, i]));
-  const sankeyLinks = links.map(l => ({
-    source: nodeIndex[l.source],
-    target: nodeIndex[l.target],
-    value:  l.value,
+  // データソース別色
+  const dsNames  = [...new Set(fields.map(f => f.datasource))];
+  const dsColors = Object.fromEntries(dsNames.map((n, i) => [n, DS_PALETTE[i % DS_PALETTE.length]]));
+  const fieldDs  = Object.fromEntries(fields.map(f => [f.field, f.datasource]));
+
+  // ノード・リンク構築
+  const nodeNames = new Set();
+  edges.forEach(e => { nodeNames.add(e.source); nodeNames.add(e.target); });
+  const nodes = Array.from(nodeNames).map(name => ({
+    name,
+    color:      dsColors[fieldDs[name]] || '#aaa',
+    datasource: fieldDs[name]           || '（不明）',
+  }));
+  const nodeIdx = Object.fromEntries(nodes.map((n, i) => [n.name, i]));
+  const links   = edges.map(e => ({
+    source:     nodeIdx[e.source],
+    target:     nodeIdx[e.target],
+    value:      Math.max(1, e.weight),
+    formula:    e.formula || '',
+    datasource: e.datasource || '',
   }));
 
-  const W = svg.parentElement.clientWidth || 800;
-  const H = Math.max(300, nodes.length * 22);
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.setAttribute('height', H);
+  const container = document.getElementById('sankey-container');
+  const W = Math.max(container.getBoundingClientRect().width || container.offsetWidth || 900, 600);
+  const H = Math.max(400, nodes.length * 28);
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+  const svg = d3.select('#sankey-container')
+    .append('svg')
+    .attr('width', W)
+    .attr('height', H)
+    .style('width', '100%')
+    .style('display', 'block');
 
   const sankey = d3.sankey()
-    .nodeWidth(12)
-    .nodePadding(10)
-    .extent([[16, 16], [W - 160, H - 16]]);
+    .nodeWidth(16)
+    .nodePadding(12)
+    .extent([[1, 1], [W - 1, H - 6]]);
 
-  const graph = sankey({ nodes: nodes.map(d => ({ ...d })), links: sankeyLinks });
+  const graph = sankey({
+    nodes: nodes.map(d => ({ ...d })),
+    links: links.map(d => ({ ...d })),
+  });
 
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const color  = d3.scaleOrdinal(d3.schemeTableau10);
-  const s = d3.select(svg);
+  // ツールチップ
+  const tooltip = d3.select('#sankey-container')
+    .append('div')
+    .classed('sankey-tooltip', true)
+    .style('pointer-events', 'none');
 
-  // リンク
-  s.append('g').selectAll('path')
+  let _pinned = false;
+  window._sankeyTooltipUnpin = null;
+
+  function unpinTooltip() {
+    _pinned = false;
+    tooltip.style('display', 'none').style('pointer-events', 'none');
+    window._sankeyTooltipUnpin = null;
+  }
+
+  function positionTooltip(event) {
+    const tipNode = tooltip.node();
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    const tW = tipNode.offsetWidth;
+    const tH = tipNode.offsetHeight;
+    const x = event.offsetX, y = event.offsetY;
+    const left = (x + 14 + tW > cW) ? Math.max(0, x - tW - 14) : x + 14;
+    const top  = (y + 14 + tH > cH) ? Math.max(0, y - tH - 14) : y + 14;
+    tooltip.style('left', left + 'px').style('top', top + 'px');
+  }
+
+  function showTooltip(event, html) {
+    tooltip.style('display', 'block').html(html);
+    positionTooltip(event);
+  }
+
+  function hideTooltip() { tooltip.style('display', 'none'); }
+
+  function _linkHtml(d, pinned) {
+    const title = `<strong>${esc(d.source.name)} → ${esc(d.target.name)}</strong><hr class="my-1">`;
+    const code  = `<code style="font-size:11px;display:block;white-space:pre-wrap;word-break:break-all">${esc(d.formula)}</code>`;
+    if (pinned) {
+      return title + code
+        + `<div class="d-flex justify-content-end mt-2 gap-1">`
+        + `<button onclick="copyFormula(this)" data-formula="${esc(d.formula)}"
+             class="btn btn-sm btn-primary py-0 px-2" style="font-size:0.75rem;pointer-events:auto">
+             <i class="bi bi-clipboard me-1"></i>コピー</button>`
+        + `<button onclick="window._sankeyTooltipUnpin&&window._sankeyTooltipUnpin()"
+             class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.75rem;pointer-events:auto">✕</button>`
+        + `</div>`;
+    }
+    return title + code
+      + `<div class="text-muted mt-1" style="font-size:0.65rem">クリックで固定してコピー</div>`;
+  }
+
+  function resetAllLinks() {
+    svg.selectAll('path.sankey-link')
+      .attr('stroke',         isDark ? '#3a5a80' : '#ccc')
+      .attr('stroke-opacity', isDark ? 0.55 : 0.45);
+  }
+
+  // リンク描画
+  svg.append('g').selectAll('path')
     .data(graph.links)
     .join('path')
     .attr('class', 'sankey-link')
-    .attr('d', d3.sankeyLinkHorizontal())
-    .attr('stroke', d => color(d.source.name))
-    .attr('stroke-width', d => Math.max(1, d.width));
+    .attr('d',              d3.sankeyLinkHorizontal())
+    .attr('stroke',         isDark ? '#3a5a80' : '#ccc')
+    .attr('stroke-width',   d => Math.max(1, d.width))
+    .attr('fill',           'none')
+    .attr('stroke-opacity', isDark ? 0.55 : 0.45)
+    .style('cursor', 'pointer')
+    .on('mouseover', function(event, d) {
+      if (_pinned) return;
+      resetAllLinks();
+      d3.select(this).attr('stroke', isDark ? '#6ab0f0' : 'orange').attr('stroke-opacity', 0.9);
+      tooltip.style('display', 'block').html(_linkHtml(d, false));
+      positionTooltip(event);
+    })
+    .on('mousemove', function(event) { if (!_pinned) positionTooltip(event); })
+    .on('mouseout',  function() {
+      if (_pinned) return;
+      resetAllLinks();
+      hideTooltip();
+    })
+    .on('click', function(event, d) {
+      event.stopPropagation();
+      _pinned = true;
+      tooltip
+        .style('display', 'block')
+        .style('pointer-events', 'auto')
+        .html(_linkHtml(d, true));
+      positionTooltip(event);
+      window._sankeyTooltipUnpin = unpinTooltip;
+    });
 
-  // ノード
-  const node = s.append('g').selectAll('g')
+  // SVG 背景クリックでピン解除
+  svg.on('click', function() {
+    if (_pinned) unpinTooltip();
+    resetAllLinks();
+  });
+
+  // ノード描画
+  const node = svg.append('g').selectAll('g')
     .data(graph.nodes)
     .join('g');
 
   node.append('rect')
-    .attr('x', d => d.x0).attr('y', d => d.y0)
-    .attr('width', d => d.x1 - d.x0)
+    .attr('x',      d => d.x0)
+    .attr('y',      d => d.y0)
     .attr('height', d => Math.max(1, d.y1 - d.y0))
-    .attr('fill', d => color(d.name))
-    .attr('rx', 3);
+    .attr('width',  d => d.x1 - d.x0)
+    .attr('fill',   d => d.color)
+    .attr('rx',     2)
+    .on('mouseover', function(event, d) {
+      svg.selectAll('path.sankey-link')
+        .attr('stroke', l => (l.source?.name === d.name || l.target?.name === d.name) ? d.color : (isDark ? '#3a5a80' : '#ccc'))
+        .attr('stroke-opacity', l => (l.source?.name === d.name || l.target?.name === d.name) ? 0.85 : 0.15);
+      showTooltip(event,
+        `<strong>${esc(d.name)}</strong><br>` +
+        `<span class="text-muted">📂 ${esc(d.datasource)}</span>`);
+    })
+    .on('mousemove', function(event) { positionTooltip(event); })
+    .on('mouseout',  function() { resetAllLinks(); hideTooltip(); });
 
+  // ラベル描画（ハロー付き）
   node.append('text')
-    .attr('x', d => d.x1 + 4)
-    .attr('y', d => (d.y0 + d.y1) / 2)
-    .attr('dy', '0.35em')
-    .attr('font-size', 11)
-    .attr('fill', isDark ? '#cfe2ff' : '#1a2a3a')
-    .text(d => d.name);
+    .attr('x',            d => d.x0 < W / 2 ? d.x1 + 7 : d.x0 - 7)
+    .attr('y',            d => (d.y0 + d.y1) / 2)
+    .attr('dy',           '0.35em')
+    .attr('text-anchor',  d => d.x0 < W / 2 ? 'start' : 'end')
+    .attr('font-size',    '12px')
+    .attr('font-weight',  '500')
+    .attr('fill',         isDark ? '#dce8ff' : '#1a1a2e')
+    .attr('stroke',       isDark ? 'rgba(10,18,38,0.9)' : 'rgba(255,255,255,0.9)')
+    .attr('stroke-width', '2.5')
+    .attr('paint-order',  'stroke fill')
+    .text(d => d.name.length > 30 ? d.name.slice(0, 29) + '…' : d.name)
+    .append('title').text(d => d.name);
 
   document.getElementById('sankey-wrap').style.display = 'block';
 }
@@ -767,7 +1035,7 @@ function _csvEscape(v) {
 }
 
 function _downloadCSV(rows, filename) {
-  const bom = '\uFEFF'; // Excel BOM
+  const bom = '﻿';
   const csv = bom + rows.map(r => r.map(_csvEscape).join(',')).join('\r\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
@@ -780,11 +1048,11 @@ function _downloadCSV(rows, filename) {
 
 function downloadDiffCSV() {
   if (!_lastDiffData) return;
-  const diff = _lastDiffData.diff || {};
+  const diff   = _lastDiffData.diff || {};
   const wbName = _lastDiffData.workbook_name || 'workbook';
-  const bRev = (_lastDiffData.base_revision || {}).revision_number || '';
-  const hRev = (_lastDiffData.head_revision || {}).revision_number || '';
-  const rows = [['カテゴリ', '変更種別', 'フィールド名/シート名', 'データソース', '変更前', '変更後']];
+  const bRev   = (_lastDiffData.base_revision || {}).revision_number || '';
+  const hRev   = (_lastDiffData.head_revision || {}).revision_number || '';
+  const rows   = [['カテゴリ', '変更種別', 'フィールド名/シート名', 'データソース', '変更前', '変更後']];
 
   const cf = diff.calculated_fields || {};
   (cf.added   || []).forEach(f => rows.push(['計算フィールド', '追加', f.field, f.datasource, '', f.formula]));
@@ -809,8 +1077,8 @@ function downloadDiffCSV() {
 function downloadFieldsCSV() {
   if (!_allFields.length) return;
   const wbName = (document.getElementById('fields-wb-input') || {}).value || 'workbook';
-  const rows = [['フィールド名', 'データソース', 'フォーミュラ']];
-  _allFields.forEach(f => rows.push([f.field, f.datasource, f.formula]));
+  const rows   = [['データソース', 'フィールド名', 'フォーミュラ']];
+  _allFields.forEach(f => rows.push([f.datasource, f.field, f.formula]));
   _downloadCSV(rows, `fields_${wbName}.csv`);
 }
 
