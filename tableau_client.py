@@ -114,7 +114,23 @@ def _parse_twb_fields(content: str) -> dict:
             continue
         caption = ds.get("caption", ds_name)
         if ds_name not in seen_ds:
-            datasources.append({"name": ds_name, "caption": caption})
+            # 接続情報を取得
+            connections = []
+            for conn in ds.findall(".//connection"):
+                ctype = conn.get("class", conn.get("dbclass", ""))
+                server = conn.get("server", "")
+                database = conn.get("dbname", conn.get("database", ""))
+                if ctype:
+                    connections.append({
+                        "type": ctype,
+                        "server": server,
+                        "database": database,
+                    })
+            datasources.append({
+                "name": ds_name,
+                "caption": caption,
+                "connections": connections,
+            })
             seen_ds.add(ds_name)
 
         # 内部名 → 論理名(caption) のマッピングを構築

@@ -592,6 +592,7 @@ function renderDiff(data) {
     (diff.calculated_fields?.changed?.length || 0) +
     (diff.filters?.added?.length || 0) +
     (diff.filters?.deleted?.length || 0) +
+    (diff.filters?.changed?.length || 0) +
     (diff.datasources?.added?.length || 0) +
     (diff.datasources?.deleted?.length || 0) +
     (diff.sheets?.added?.length || 0) +
@@ -641,15 +642,18 @@ function renderDiff(data) {
 
   // フィルター
   const fl = diff.filters || {};
-  const flA = fl.added?.length || 0, flD = fl.deleted?.length || 0;
-  html += '<div class="diff-section">' + _sectionHeader('fl', 'フィルター', flA, flD, 0);
-  if (_diffSectionOpen.fl && (flA || flD)) {
+  const flA = fl.added?.length || 0, flD = fl.deleted?.length || 0, flC = fl.changed?.length || 0;
+  html += '<div class="diff-section">' + _sectionHeader('fl', 'フィルター', flA, flD, flC);
+  if (_diffSectionOpen.fl && (flA || flD || flC)) {
     html += '<div class="diff-section-body">';
     (fl.added || []).forEach(f => {
       html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet)}</span></div>`;
     });
     (fl.deleted || []).forEach(f => {
       html += `<div class="diff-item"><span class="badge badge-del me-2">削除</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet)}</span></div>`;
+    });
+    (fl.changed || []).forEach(f => {
+      html += `<div class="diff-item"><span class="badge badge-chg me-2">変更</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet || '')}</span></div>`;
     });
     html += '</div>';
   }
@@ -728,10 +732,16 @@ async function runFields() {
          <div class="d-flex flex-wrap gap-2">` +
         datasources.map(d => {
           const color = dsColors[d.caption || d.name] || dsColors[d.name] || '#aaa';
-          return `<div class="card border-0 px-3 py-2" style="border-left:4px solid ${color}!important;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:160px">
-            <div class="fw-semibold small" style="color:${color}">
+          const conns = (d.connections || []).length
+          ? d.connections.map(c =>
+              `<span class="badge bg-secondary me-1" style="font-size:.7rem">${esc(c.type)}${c.server ? ': ' + esc(c.server) : ''}${c.database ? ' / ' + esc(c.database) : ''}</span>`
+            ).join('')
+          : '';
+        return `<div class="card border-0 px-3 py-2" style="border-left:4px solid ${color}!important;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:180px">
+            <div class="fw-semibold small mb-1" style="color:${color}">
               <i class="bi bi-database-fill me-1"></i>${esc(d.caption || d.name)}
             </div>
+            ${conns}
           </div>`;
         }).join('') + '</div>';
       document.getElementById('fields-table-wrap').before(panel);
@@ -1067,6 +1077,7 @@ function downloadDiffCSV() {
   const fl = diff.filters || {};
   (fl.added   || []).forEach(f => rows.push(['フィルター', '追加', f.field, f.sheet || '', '', '']));
   (fl.deleted || []).forEach(f => rows.push(['フィルター', '削除', f.field, f.sheet || '', '', '']));
+  (fl.changed || []).forEach(f => rows.push(['フィルター', '変更', f.field, f.sheet || '', '', '']));
 
   const ds = diff.datasources || {};
   (ds.added   || []).forEach(d => rows.push(['データソース', '追加', d.caption || d.name, '', '', '']));
