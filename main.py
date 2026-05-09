@@ -64,7 +64,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Workbook Analyzer for Tableau",
     description="Tableau Cloud ワークブックのリビジョン差分・計算フィールド分析ツール",
-    version="1.2.0",
+    version="1.3.0",
     lifespan=lifespan,
 )
 

@@ -102,7 +102,7 @@
   .wb-item:hover { background: var(--tc-light); }
   [data-theme="dark"] .wb-item:hover { background: #1e3448; }
 
-  /* 差分バッジ */
+  /* 差分バッジ（ラベル） */
   .badge-add { background: #d1fae5; color: #065f46; }
   .badge-del { background: #fee2e2; color: #991b1b; }
   .badge-chg { background: #ffedd5; color: #92400e; }
@@ -110,17 +110,45 @@
   [data-theme="dark"] .badge-del { background: #7f1d1d; color: #fca5a5; }
   [data-theme="dark"] .badge-chg { background: #78350f; color: #fcd34d; }
 
-  .diff-section { margin-bottom: .75rem; border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; }
-  .diff-section-header {
-    font-size: .85rem; font-weight: 700; color: var(--text-body);
-    text-transform: uppercase; letter-spacing: .05em; margin: 0;
-    padding: 8px 12px; background: var(--bg-page); cursor: pointer; user-select: none;
-    display: flex; align-items: center;
+  /* 差分統計バッジ（メタバー） */
+  .diff-stat-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: .82rem; font-weight: 600;
+    border-radius: 20px; padding: 4px 12px;
   }
-  .diff-section-header:hover { background: var(--border-subtle); }
-  [data-theme="dark"] .diff-section-header { background: var(--bg-detail); }
-  [data-theme="dark"] .diff-section-header:hover { background: #1e2e50; }
+  .diff-stat-badge.new     { background: #d4f0da; color: #1a5c2a; }
+  .diff-stat-badge.changed { background: #fff3cd; color: #7a5800; }
+  .diff-stat-badge.deleted { background: #fde8e8; color: #8b1a1a; }
+  [data-theme="dark"] .diff-stat-badge.new     { background: #0d3320; color: #4de87a; }
+  [data-theme="dark"] .diff-stat-badge.changed { background: #3a2e00; color: #ffd55e; }
+  [data-theme="dark"] .diff-stat-badge.deleted { background: #3a0a0a; color: #ff8080; }
+
+  /* 差分セクション */
+  .diff-section { margin-bottom: .75rem; border: 1px solid var(--border-subtle); border-radius: 10px; overflow: hidden; }
+  .diff-section-header {
+    font-size: .88rem; font-weight: 600;
+    padding: 10px 16px; cursor: pointer; user-select: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: background .15s;
+  }
+  .diff-section-header:hover { filter: brightness(0.97); }
+  .diff-section.new-section     .diff-section-header { background: #edfaf1; color: #1a5c2a; }
+  .diff-section.changed-section .diff-section-header { background: #fffbec; color: #7a5800; }
+  .diff-section.deleted-section .diff-section-header { background: #fff5f5; color: #8b1a1a; }
+  .diff-section.neutral-section .diff-section-header { background: var(--bg-detail); color: var(--text-body); }
+  [data-theme="dark"] .diff-section.new-section     .diff-section-header { background: #0d2a1a; color: #4de87a; }
+  [data-theme="dark"] .diff-section.changed-section .diff-section-header { background: #2a2000; color: #ffd55e; }
+  [data-theme="dark"] .diff-section.deleted-section .diff-section-header { background: #2a0808; color: #ff8080; }
+  [data-theme="dark"] .diff-section.neutral-section .diff-section-header { background: var(--bg-detail); color: var(--text-body); }
+  .diff-section-header .diff-count {
+    margin-left: auto; font-size: .75rem; font-weight: 700;
+    background: rgba(0,0,0,.08); border-radius: 12px; padding: 2px 9px;
+  }
+  [data-theme="dark"] .diff-section-header .diff-count { background: rgba(255,255,255,.1); }
+  .diff-section-chevron { font-size: .8rem; transition: transform .2s; }
+  .diff-section-header.collapsed .diff-section-chevron { transform: rotate(-90deg); }
   .diff-section-body { padding: 8px; background: var(--bg-card); }
+
   .diff-item { font-size: .82rem; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; background: var(--bg-page); color: var(--text-body); }
   .diff-item .text-muted { color: var(--text-muted2) !important; }
   .formula-box { font-family: monospace; font-size: .78rem; border-radius: 4px; padding: 4px 8px; margin-top: 4px; word-break: break-all; }
@@ -165,9 +193,41 @@
   /* ステータスバー */
   #status-bar { font-size: .78rem; }
   .spinner-border-sm { width: 1rem; height: 1rem; }
+
+  /* ローディングオーバーレイ */
+  #loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,.88);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 9999;
+  }
+  [data-theme="dark"] #loading-overlay { background: rgba(10,15,30,.92); }
+  .spinner-tc { width: 3rem; height: 3rem; border-width: .35rem;
+    border-color: var(--tc-blue) transparent var(--tc-blue) transparent; }
+  [data-theme="dark"] .spinner-tc { border-color: var(--tc-sky) transparent var(--tc-sky) transparent; }
+  #loading-msg { color: var(--text-muted2); font-weight: 500; margin-top: .75rem; }
+
+  /* 言語ボタン */
+  #btn-lang { font-size: 0.75rem; min-width: 2.8rem; }
+
+  /* 差分メタバー */
+  .diff-meta-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px; padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .diff-meta-bar .diff-badge-group { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
+
+<!-- ローディングオーバーレイ -->
+<div id="loading-overlay">
+  <div class="spinner-border spinner-tc"></div>
+  <div id="loading-msg">Tableau Cloud からワークブックを取得中...</div>
+</div>
 
 <!-- ナビゲーション -->
 <nav class="navbar navbar-expand-lg px-3 py-2">
@@ -177,26 +237,29 @@
   </span>
   <div class="ms-auto d-flex align-items-center gap-2">
     <span id="status-bar" class="text-white-50 small"></span>
+    <button id="btn-lang" class="btn btn-sm btn-outline-light px-2" onclick="toggleLang()" title="Switch language / 言語切替">
+      <span id="lang-label">EN</span>
+    </button>
     <button class="btn btn-sm btn-outline-light px-2" onclick="doRefresh()" title="ワークブック一覧を再取得">
       <i class="bi bi-arrow-clockwise"></i>
     </button>
     <button class="btn btn-sm btn-outline-light px-2" onclick="toggleTheme()" title="ダークモード切替">
-      <i class="bi bi-moon-stars-fill"></i>
+      <i class="bi bi-moon-fill" id="dark-icon" style="font-size:0.85rem"></i>
     </button>
   </div>
 </nav>
 
-<!-- タブ -->
-<div class="container-fluid px-3 pt-3 pb-5">
+<!-- メインコンテンツ -->
+<div id="main-content" class="container-fluid px-3 pt-3 pb-5" style="display:none">
   <ul class="nav nav-tabs mb-3" id="mainTabs">
     <li class="nav-item">
       <a class="nav-link active" data-bs-toggle="tab" href="#tab-diff">
-        <i class="bi bi-clock-history me-1"></i>リビジョン差分
+        <i class="bi bi-clock-history me-1"></i><span data-i18n="nav_diff">リビジョン差分</span>
       </a>
     </li>
     <li class="nav-item">
       <a class="nav-link" data-bs-toggle="tab" href="#tab-fields">
-        <i class="bi bi-diagram-2 me-1"></i>計算フィールド分析
+        <i class="bi bi-diagram-2 me-1"></i><span data-i18n="nav_fields">計算フィールド分析</span>
       </a>
     </li>
   </ul>
@@ -210,7 +273,7 @@
 
           <!-- ワークブック検索 -->
           <div class="col-md-5">
-            <label class="form-label small text-muted mb-1">ワークブックを検索</label>
+            <label class="form-label small text-muted mb-1" data-i18n="lbl_wb_search">ワークブックを検索</label>
             <div class="position-relative" id="diff-wb-wrap">
               <input type="text" id="diff-wb-input" class="form-control form-control-sm pe-4"
                      autocomplete="off" placeholder="— 名前またはプロジェクトで検索 —"
@@ -225,7 +288,7 @@
 
           <!-- 比較元 -->
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">比較元 (Base)</label>
+            <label class="form-label small text-muted mb-1" data-i18n="lbl_base">比較元 (Base)</label>
             <select id="diff-base-select" class="form-select form-select-sm" disabled>
               <option value="">—</option>
             </select>
@@ -237,7 +300,7 @@
 
           <!-- 比較先 -->
           <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">比較先 (Head)</label>
+            <label class="form-label small text-muted mb-1" data-i18n="lbl_head">比較先 (Head)</label>
             <select id="diff-head-select" class="form-select form-select-sm" disabled>
               <option value="">—</option>
             </select>
@@ -245,7 +308,7 @@
 
           <div class="col-md-2 d-flex gap-1">
             <button id="diff-run-btn" class="btn btn-sm btn-primary flex-grow-1" onclick="runDiff()" disabled>
-              <i class="bi bi-search me-1"></i>比較を実行
+              <i class="bi bi-search me-1"></i><span data-i18n="btn_compare">比較を実行</span>
             </button>
             <button id="diff-csv-btn" class="btn btn-sm btn-outline-secondary" onclick="downloadDiffCSV()" disabled title="CSVをダウンロード">
               <i class="bi bi-download"></i>
@@ -254,7 +317,7 @@
         </div>
 
         <div id="diff-result">
-          <div class="text-muted small text-center py-4">ワークブックを選択して比較を実行してください</div>
+          <div class="text-muted small text-center py-4" data-i18n="diff_placeholder">ワークブックを選択して比較を実行してください</div>
         </div>
       </div>
     </div>
@@ -266,7 +329,7 @@
 
           <!-- ワークブック検索 -->
           <div class="col-md-6">
-            <label class="form-label small text-muted mb-1">ワークブックを検索</label>
+            <label class="form-label small text-muted mb-1" data-i18n="lbl_wb_search">ワークブックを検索</label>
             <div class="position-relative" id="fields-wb-wrap">
               <input type="text" id="fields-wb-input" class="form-control form-control-sm pe-4"
                      autocomplete="off" placeholder="— 名前またはプロジェクトで検索 —"
@@ -281,7 +344,7 @@
 
           <div class="col-auto">
             <button id="fields-run-btn" class="btn btn-sm btn-primary" onclick="runFields()" disabled>
-              <i class="bi bi-diagram-2 me-1"></i>分析を実行
+              <i class="bi bi-diagram-2 me-1"></i><span data-i18n="btn_analyze">分析を実行</span>
             </button>
           </div>
         </div>
@@ -292,7 +355,7 @@
         <div id="fields-table-wrap" style="display:none" class="mb-3">
           <div class="d-flex align-items-center justify-content-between mb-2">
             <h6 class="fw-bold mb-0" style="color:var(--tc-mid)">
-              <i class="bi bi-table me-1"></i>計算フィールド一覧
+              <i class="bi bi-table me-1"></i><span data-i18n="fields_list">計算フィールド一覧</span>
             </h6>
             <div class="d-flex gap-2">
               <input type="text" id="fields-filter-input" class="form-control form-control-sm"
@@ -307,9 +370,9 @@
             <table class="table table-sm table-hover mb-0" id="fields-table">
               <thead class="sticky-top">
                 <tr>
-                  <th>データソース</th>
-                  <th>フィールド名</th>
-                  <th>計算式（抜粋）</th>
+                  <th data-i18n="th_datasource">データソース</th>
+                  <th data-i18n="th_fieldname">フィールド名</th>
+                  <th data-i18n="th_formula">計算式（抜粋）</th>
                 </tr>
               </thead>
               <tbody id="fields-tbody"></tbody>
@@ -320,14 +383,14 @@
         <!-- Sankey チャート -->
         <div id="sankey-wrap" style="display:none">
           <h6 class="fw-bold mb-1" style="color:var(--tc-mid)">
-            <i class="bi bi-share me-1"></i>フィールド依存関係図
+            <i class="bi bi-share me-1"></i><span data-i18n="fields_sankey">フィールド依存関係図</span>
           </h6>
-          <p class="text-muted small mb-2">ノード色はデータソース別。リンクにホバーすると計算式を確認できます。</p>
+          <p class="text-muted small mb-2" data-i18n="fields_sankey_hint">ノード色はデータソース別。リンクにホバーすると計算式を確認できます。</p>
           <div id="sankey-container"></div>
         </div>
 
         <div id="fields-result">
-          <div class="text-muted small text-center py-4">ワークブックを選択して分析を実行してください</div>
+          <div class="text-muted small text-center py-4" data-i18n="fields_placeholder">ワークブックを選択して分析を実行してください</div>
         </div>
       </div>
     </div>
@@ -339,6 +402,125 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
 <script>
+// ─────────────────────────────────────────────
+// i18n
+// ─────────────────────────────────────────────
+const I18N = {
+  ja: {
+    nav_diff:          'リビジョン差分',
+    nav_fields:        '計算フィールド分析',
+    lbl_wb_search:     'ワークブックを検索',
+    lbl_base:          '比較元 (Base)',
+    lbl_head:          '比較先 (Head)',
+    btn_compare:       '比較を実行',
+    btn_analyze:       '分析を実行',
+    diff_placeholder:  'ワークブックを選択して比較を実行してください',
+    fields_placeholder:'ワークブックを選択して分析を実行してください',
+    fields_list:       '計算フィールド一覧',
+    fields_sankey:     'フィールド依存関係図',
+    fields_sankey_hint:'ノード色はデータソース別。リンクにホバーすると計算式を確認できます。',
+    th_datasource:     'データソース',
+    th_fieldname:      'フィールド名',
+    th_formula:        '計算式（抜粋）',
+    wb_placeholder:    '— 名前またはプロジェクトで検索 —',
+    wb_not_found:      '見つかりません',
+    loading_msg:       'Tableau Cloud からワークブックを取得中...',
+    status_loading:    'ワークブック一覧を取得中...',
+    status_refetch:    '再取得中...',
+    rev_loading:       'リビジョンを取得中...',
+    rev_select_hint:   'リビジョンを選んで「比較を実行」してください',
+    rev_no_rev:        '比較できるリビジョンが2件以上ありません',
+    diff_computing:    '差分を計算中...',
+    diff_no_changes:   'このリビジョン間に変更はありません',
+    fields_analyzing:  'ワークブックを解析中...',
+    ds_panel_title:    '使用データソース',
+    badge_added:       '追加',
+    badge_deleted:     '削除',
+    badge_changed:     '変更',
+    badge_no_change:   '変更なし',
+    section_cf:        '計算フィールド',
+    section_fl:        'フィルター',
+    section_ds:        'データソース',
+    section_sh:        'シート',
+    copy_btn:          'コピー',
+    copy_hint:         'クリックで固定してコピー',
+    err_fetch:         '取得失敗: ',
+    err_diff:          '差分取得失敗: ',
+    err_analyze:       '取得失敗: ',
+  },
+  en: {
+    nav_diff:          'Revision Diff',
+    nav_fields:        'Calculated Fields',
+    lbl_wb_search:     'Search workbook',
+    lbl_base:          'Base revision',
+    lbl_head:          'Head revision',
+    btn_compare:       'Compare',
+    btn_analyze:       'Analyze',
+    diff_placeholder:  'Select a workbook and run comparison',
+    fields_placeholder:'Select a workbook and run analysis',
+    fields_list:       'Calculated Fields',
+    fields_sankey:     'Field Dependency Diagram',
+    fields_sankey_hint:'Node color = data source. Hover links to see formulas.',
+    th_datasource:     'Data Source',
+    th_fieldname:      'Field Name',
+    th_formula:        'Formula (preview)',
+    wb_placeholder:    '— Search by name or project —',
+    wb_not_found:      'No results',
+    loading_msg:       'Fetching workbooks from Tableau Cloud...',
+    status_loading:    'Fetching workbook list...',
+    status_refetch:    'Refreshing...',
+    rev_loading:       'Fetching revisions...',
+    rev_select_hint:   'Select revisions and click Compare',
+    rev_no_rev:        'Need at least 2 revisions to compare',
+    diff_computing:    'Computing diff...',
+    diff_no_changes:   'No changes between these revisions',
+    fields_analyzing:  'Analyzing workbook...',
+    ds_panel_title:    'Data Sources',
+    badge_added:       'Added',
+    badge_deleted:     'Deleted',
+    badge_changed:     'Changed',
+    badge_no_change:   'No change',
+    section_cf:        'Calculated Fields',
+    section_fl:        'Filters',
+    section_ds:        'Data Sources',
+    section_sh:        'Sheets',
+    copy_btn:          'Copy',
+    copy_hint:         'Click to pin and copy',
+    err_fetch:         'Fetch error: ',
+    err_diff:          'Diff error: ',
+    err_analyze:       'Analyze error: ',
+  },
+};
+
+let _lang = localStorage.getItem('wa_lang') || 'ja';
+
+function t(key) {
+  return (I18N[_lang] || I18N.ja)[key] || (I18N.ja)[key] || key;
+}
+
+function applyLang(lang) {
+  _lang = lang;
+  localStorage.setItem('wa_lang', lang);
+  document.documentElement.lang = lang;
+  document.getElementById('lang-label').textContent = lang === 'ja' ? 'EN' : 'JA';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const val = (I18N[lang] || I18N.ja)[key];
+    if (val !== undefined) el.textContent = val;
+  });
+  // プレースホルダーも更新
+  ['diff', 'fields'].forEach(p => {
+    const inp = document.getElementById(`${p}-wb-input`);
+    if (inp && !inp.value) inp.placeholder = t('wb_placeholder');
+  });
+  const loadingEl = document.getElementById('loading-msg');
+  if (loadingEl) loadingEl.textContent = t('loading_msg');
+}
+
+function toggleLang() {
+  applyLang(_lang === 'ja' ? 'en' : 'ja');
+}
+
 // ─────────────────────────────────────────────
 // 定数
 // ─────────────────────────────────────────────
@@ -356,8 +538,8 @@ const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 async function fetchJSON(url) {
   const r = await fetch(url);
   if (!r.ok) {
-    const t = await r.text();
-    throw new Error(`HTTP ${r.status}: ${t}`);
+    const txt = await r.text();
+    throw new Error(`HTTP ${r.status}: ${txt}`);
   }
   return r.json();
 }
@@ -365,15 +547,21 @@ async function fetchJSON(url) {
 // ─────────────────────────────────────────────
 // テーマ
 // ─────────────────────────────────────────────
-function toggleTheme() {
-  const html = document.documentElement;
-  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('wa_theme', theme);
+  const icon = document.getElementById('dark-icon');
+  if (icon) icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
 }
-(function() {
-  const t = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', t);
+
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem('wa_theme') || 'light';
+  applyTheme(saved);
 })();
 
 // ─────────────────────────────────────────────
@@ -386,7 +574,7 @@ async function pollStatus() {
     const s = await fetchJSON('/api/status');
     const bar = document.getElementById('status-bar');
     if (s.status === 'loading') {
-      bar.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>ワークブック一覧を取得中...';
+      bar.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>${t('status_loading')}`;
       setTimeout(pollStatus, 2000);
     } else if (s.status === 'ok') {
       const dt = s.fetched_at ? new Date(s.fetched_at).toLocaleString() : '';
@@ -396,8 +584,13 @@ async function pollStatus() {
         if (vEl) vEl.textContent = `v${s.version}`;
       }
       await loadWorkbooks();
+      // ローディングオーバーレイを非表示
+      document.getElementById('loading-overlay').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
     } else {
       bar.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>${esc(s.error)}</span>`;
+      document.getElementById('loading-overlay').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
     }
   } catch(e) {
     setTimeout(pollStatus, 3000);
@@ -412,7 +605,7 @@ async function loadWorkbooks() {
 async function doRefresh() {
   await fetch('/api/refresh', { method: 'POST' });
   document.getElementById('status-bar').innerHTML =
-    '<span class="spinner-border spinner-border-sm me-1"></span>再取得中...';
+    `<span class="spinner-border spinner-border-sm me-1"></span>${t('status_refetch')}`;
   setTimeout(pollStatus, 1000);
 }
 
@@ -439,7 +632,7 @@ function _renderWbDropdown(prefix, list) {
   const dd = document.getElementById(`${prefix}-wb-dropdown`);
   if (!dd) return;
   if (!list.length) {
-    dd.innerHTML = '<div class="wb-item text-muted">見つかりません</div>';
+    dd.innerHTML = `<div class="wb-item text-muted">${t('wb_not_found')}</div>`;
     dd.style.display = 'block';
     return;
   }
@@ -509,14 +702,14 @@ async function onDiffWbSelect(wbId) {
   btn.disabled = true;
 
   document.getElementById('diff-result').innerHTML =
-    '<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>リビジョンを取得中...</div>';
+    `<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>${t('rev_loading')}</div>`;
 
   try {
     const data = await fetchJSON(`/api/workbooks/${wbId}/revisions`);
     const revs = data.revisions || [];
     if (revs.length < 2) {
       document.getElementById('diff-result').innerHTML =
-        '<div class="text-muted small text-center py-3">比較できるリビジョンが2件以上ありません</div>';
+        `<div class="text-muted small text-center py-3">${t('rev_no_rev')}</div>`;
       return;
     }
     const opts = revs.map(r => {
@@ -532,10 +725,10 @@ async function onDiffWbSelect(wbId) {
     headEl.disabled = false;
     btn.disabled = false;
     document.getElementById('diff-result').innerHTML =
-      '<div class="text-muted small text-center py-3">リビジョンを選んで「比較を実行」してください</div>';
+      `<div class="text-muted small text-center py-3">${t('rev_select_hint')}</div>`;
   } catch(e) {
     document.getElementById('diff-result').innerHTML =
-      `<div class="text-danger small text-center py-3">取得失敗: ${esc(String(e))}</div>`;
+      `<div class="text-danger small text-center py-3">${t('err_fetch')}${esc(String(e))}</div>`;
   }
 }
 
@@ -548,14 +741,14 @@ async function runDiff() {
 
   btn.disabled = true;
   document.getElementById('diff-result').innerHTML =
-    '<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>差分を計算中...</div>';
+    `<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>${t('diff_computing')}</div>`;
 
   try {
     const data = await fetchJSON(`/api/workbooks/${wbId}/revision-diff?base=${baseRev}&head=${headRev}`);
     renderDiff(data);
   } catch(e) {
     document.getElementById('diff-result').innerHTML =
-      `<div class="text-danger small text-center py-3">差分取得失敗: ${esc(String(e))}</div>`;
+      `<div class="text-danger small text-center py-3">${t('err_diff')}${esc(String(e))}</div>`;
   } finally {
     btn.disabled = false;
   }
@@ -582,57 +775,77 @@ function renderDiff(data) {
     return `<strong>v${esc(r.revision_number)}</strong>&nbsp;<span style="color:var(--text-muted2)">${dt}${pub}</span>`;
   };
 
-  let html = `<div class="mb-3 small p-2 rounded" style="background:var(--bg-detail);border:1px solid var(--border-subtle)">
-    ${_revLabel(bRev)}
-    <i class="bi bi-arrow-right mx-2" style="color:var(--text-muted2)"></i>${_revLabel(hRev)}</div>`;
-
-  const totalChanges =
-    (diff.calculated_fields?.added?.length || 0) +
-    (diff.calculated_fields?.deleted?.length || 0) +
+  const totalAdded =
+    (diff.calculated_fields?.added?.length  || 0) +
+    (diff.filters?.added?.length            || 0) +
+    (diff.datasources?.added?.length        || 0) +
+    (diff.sheets?.added?.length             || 0);
+  const totalChanged =
     (diff.calculated_fields?.changed?.length || 0) +
-    (diff.filters?.added?.length || 0) +
-    (diff.filters?.deleted?.length || 0) +
-    (diff.filters?.changed?.length || 0) +
-    (diff.datasources?.added?.length || 0) +
-    (diff.datasources?.deleted?.length || 0) +
-    (diff.sheets?.added?.length || 0) +
-    (diff.sheets?.deleted?.length || 0);
+    (diff.filters?.changed?.length           || 0);
+  const totalDeleted =
+    (diff.calculated_fields?.deleted?.length || 0) +
+    (diff.filters?.deleted?.length           || 0) +
+    (diff.datasources?.deleted?.length       || 0) +
+    (diff.sheets?.deleted?.length            || 0);
+  const totalChanges = totalAdded + totalChanged + totalDeleted;
+
+  // メタバー
+  let html = `<div class="diff-meta-bar">
+    <div style="flex:1;min-width:0">${_revLabel(bRev)}&nbsp;<i class="bi bi-arrow-right mx-1" style="color:var(--text-muted2)"></i>&nbsp;${_revLabel(hRev)}</div>
+    <div class="diff-badge-group">
+      ${totalAdded   ? `<span class="diff-stat-badge new"><i class="bi bi-plus-circle-fill"></i>+${totalAdded}</span>` : ''}
+      ${totalChanged ? `<span class="diff-stat-badge changed"><i class="bi bi-pencil-fill"></i>~${totalChanged}</span>` : ''}
+      ${totalDeleted ? `<span class="diff-stat-badge deleted"><i class="bi bi-dash-circle-fill"></i>-${totalDeleted}</span>` : ''}
+      ${!totalChanges ? `<span class="diff-stat-badge new"><i class="bi bi-check-circle-fill"></i>${t('diff_no_changes')}</span>` : ''}
+    </div>
+  </div>`;
 
   if (totalChanges === 0) {
-    html += '<div class="text-muted small text-center py-3"><i class="bi bi-check-circle me-1 text-success"></i>このリビジョン間に変更はありません</div>';
     document.getElementById('diff-result').innerHTML = html;
     return;
   }
 
+  function _sectionType(added, deleted, changed) {
+    if (added && !deleted && !changed) return 'new-section';
+    if (!added && deleted && !changed) return 'deleted-section';
+    if (changed) return 'changed-section';
+    if (added || deleted) return 'changed-section';
+    return 'neutral-section';
+  }
+
   function _sectionHeader(key, label, added, deleted, changed) {
-    const open = _diffSectionOpen[key];
-    const chev = open ? 'bi-chevron-up' : 'bi-chevron-down';
-    let badges = '';
-    if (added)   badges += `<span class="badge badge-add ms-1">+${added}</span>`;
-    if (deleted) badges += `<span class="badge badge-del ms-1">-${deleted}</span>`;
-    if (changed) badges += `<span class="badge badge-chg ms-1">~${changed}</span>`;
-    if (!added && !deleted && !changed)
-      badges = '<span class="badge bg-secondary ms-1">変更なし</span>';
-    return `<div class="diff-section-header" onclick="toggleDiffSection('${key}')">
-      <i class="bi ${chev} me-1 small"></i><span>${label}</span>${badges}</div>`;
+    const open  = _diffSectionOpen[key];
+    const total = added + deleted + changed;
+    const chevClass = open ? '' : ' collapsed';
+    return `<div class="diff-section-header${chevClass}" onclick="toggleDiffSection('${key}')">
+      <i class="bi bi-chevron-down diff-section-chevron"></i>
+      <span>${label}</span>
+      ${added   ? `<span class="badge badge-add ms-1">+${added}</span>` : ''}
+      ${deleted ? `<span class="badge badge-del ms-1">-${deleted}</span>` : ''}
+      ${changed ? `<span class="badge badge-chg ms-1">~${changed}</span>` : ''}
+      ${!total  ? `<span class="badge bg-secondary ms-1">${t('badge_no_change')}</span>` : ''}
+      <span class="diff-count">${total}</span>
+    </div>`;
   }
 
   // 計算フィールド
   const cf = diff.calculated_fields || {};
   const cfA = cf.added?.length || 0, cfD = cf.deleted?.length || 0, cfC = cf.changed?.length || 0;
-  html += '<div class="diff-section">' + _sectionHeader('cf', '計算フィールド', cfA, cfD, cfC);
+  const cfType = _sectionType(cfA, cfD, cfC);
+  html += `<div class="diff-section ${cfType}">` + _sectionHeader('cf', t('section_cf'), cfA, cfD, cfC);
   if (_diffSectionOpen.cf && (cfA || cfD || cfC)) {
     html += '<div class="diff-section-body">';
     (cf.added || []).forEach(f => {
-      html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
+      html += `<div class="diff-item"><span class="badge badge-add me-2">${t('badge_added')}</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
         <div class="formula-box formula-new">${esc(f.formula)}</div></div>`;
     });
     (cf.deleted || []).forEach(f => {
-      html += `<div class="diff-item"><span class="badge badge-del me-2">削除</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
+      html += `<div class="diff-item"><span class="badge badge-del me-2">${t('badge_deleted')}</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
         <div class="formula-box formula-old">${esc(f.formula)}</div></div>`;
     });
     (cf.changed || []).forEach(f => {
-      html += `<div class="diff-item"><span class="badge badge-chg me-2">変更</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
+      html += `<div class="diff-item"><span class="badge badge-chg me-2">${t('badge_changed')}</span><strong>${esc(f.field)}</strong> <span class="text-muted small">${esc(f.datasource)}</span>
         <div class="formula-box formula-old">${esc(f.old_formula)}</div>
         <div class="formula-box formula-new">${esc(f.new_formula)}</div></div>`;
     });
@@ -643,17 +856,18 @@ function renderDiff(data) {
   // フィルター
   const fl = diff.filters || {};
   const flA = fl.added?.length || 0, flD = fl.deleted?.length || 0, flC = fl.changed?.length || 0;
-  html += '<div class="diff-section">' + _sectionHeader('fl', 'フィルター', flA, flD, flC);
+  const flType = _sectionType(flA, flD, flC);
+  html += `<div class="diff-section ${flType}">` + _sectionHeader('fl', t('section_fl'), flA, flD, flC);
   if (_diffSectionOpen.fl && (flA || flD || flC)) {
     html += '<div class="diff-section-body">';
     (fl.added || []).forEach(f => {
-      html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet)}</span></div>`;
+      html += `<div class="diff-item"><span class="badge badge-add me-2">${t('badge_added')}</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet)}</span></div>`;
     });
     (fl.deleted || []).forEach(f => {
-      html += `<div class="diff-item"><span class="badge badge-del me-2">削除</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet)}</span></div>`;
+      html += `<div class="diff-item"><span class="badge badge-del me-2">${t('badge_deleted')}</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet)}</span></div>`;
     });
     (fl.changed || []).forEach(f => {
-      html += `<div class="diff-item"><span class="badge badge-chg me-2">変更</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet || '')}</span></div>`;
+      html += `<div class="diff-item"><span class="badge badge-chg me-2">${t('badge_changed')}</span>${esc(f.field)} <span class="text-muted small">${esc(f.sheet || '')}</span></div>`;
     });
     html += '</div>';
   }
@@ -662,14 +876,15 @@ function renderDiff(data) {
   // データソース
   const ds = diff.datasources || {};
   const dsA = ds.added?.length || 0, dsD = ds.deleted?.length || 0;
-  html += '<div class="diff-section">' + _sectionHeader('ds', 'データソース', dsA, dsD, 0);
+  const dsType = _sectionType(dsA, dsD, 0);
+  html += `<div class="diff-section ${dsType}">` + _sectionHeader('ds', t('section_ds'), dsA, dsD, 0);
   if (_diffSectionOpen.ds && (dsA || dsD)) {
     html += '<div class="diff-section-body">';
     (ds.added || []).forEach(d => {
-      html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(d.caption || d.name)}</div>`;
+      html += `<div class="diff-item"><span class="badge badge-add me-2">${t('badge_added')}</span>${esc(d.caption || d.name)}</div>`;
     });
     (ds.deleted || []).forEach(d => {
-      html += `<div class="diff-item"><span class="badge badge-del me-2">削除</span>${esc(d.caption || d.name)}</div>`;
+      html += `<div class="diff-item"><span class="badge badge-del me-2">${t('badge_deleted')}</span>${esc(d.caption || d.name)}</div>`;
     });
     html += '</div>';
   }
@@ -678,14 +893,15 @@ function renderDiff(data) {
   // シート
   const sh = diff.sheets || {};
   const shA = sh.added?.length || 0, shD = sh.deleted?.length || 0;
-  html += '<div class="diff-section">' + _sectionHeader('sh', 'シート', shA, shD, 0);
+  const shType = _sectionType(shA, shD, 0);
+  html += `<div class="diff-section ${shType}">` + _sectionHeader('sh', t('section_sh'), shA, shD, 0);
   if (_diffSectionOpen.sh && (shA || shD)) {
     html += '<div class="diff-section-body">';
     (sh.added || []).forEach(s => {
-      html += `<div class="diff-item"><span class="badge badge-add me-2">追加</span>${esc(s.name)} <span class="text-muted small">${esc(s.type)}</span></div>`;
+      html += `<div class="diff-item"><span class="badge badge-add me-2">${t('badge_added')}</span>${esc(s.name)} <span class="text-muted small">${esc(s.type)}</span></div>`;
     });
     (sh.deleted || []).forEach(s => {
-      html += `<div class="diff-item"><span class="badge badge-del me-2">削除</span>${esc(s.name)} <span class="text-muted small">${esc(s.type)}</span></div>`;
+      html += `<div class="diff-item"><span class="badge badge-del me-2">${t('badge_deleted')}</span>${esc(s.name)} <span class="text-muted small">${esc(s.type)}</span></div>`;
     });
     html += '</div>';
   }
@@ -706,7 +922,7 @@ async function runFields() {
 
   btn.disabled = true;
   document.getElementById('fields-result').innerHTML =
-    '<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>ワークブックを解析中...</div>';
+    `<div class="text-muted small text-center py-3"><span class="spinner-border spinner-border-sm me-2"></span>${t('fields_analyzing')}</div>`;
   document.getElementById('fields-table-wrap').style.display = 'none';
   document.getElementById('sankey-wrap').style.display = 'none';
   const dsPanel = document.getElementById('fields-ds-panel');
@@ -727,22 +943,22 @@ async function runFields() {
       panel.className = 'mb-3';
       panel.innerHTML =
         `<div class="mb-2 fw-bold small" style="color:var(--text-secondary2)">
-           <i class="bi bi-database me-1"></i>使用データソース（${datasources.length}件）
+           <i class="bi bi-database me-1"></i>${t('ds_panel_title')}（${datasources.length}件）
          </div>
          <div class="d-flex flex-wrap gap-2">` +
         datasources.map(d => {
           const color = dsColors[d.caption || d.name] || dsColors[d.name] || '#aaa';
           const conns = (d.connections || []).length
-          ? d.connections.map(c =>
-              `<span class="badge bg-secondary me-1" style="font-size:.7rem">${esc(c.type)}${c.server ? ': ' + esc(c.server) : ''}${c.database ? ' / ' + esc(c.database) : ''}</span>`
-            ).join('')
-          : '';
-        return `<div class="card border-0 px-3 py-2" style="border-left:4px solid ${color}!important;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:180px">
-            <div class="fw-semibold small mb-1" style="color:${color}">
-              <i class="bi bi-database-fill me-1"></i>${esc(d.caption || d.name)}
-            </div>
-            ${conns}
-          </div>`;
+            ? d.connections.map(c =>
+                `<span class="badge bg-secondary me-1" style="font-size:.7rem">${esc(c.type)}${c.server ? ': ' + esc(c.server) : ''}${c.database ? ' / ' + esc(c.database) : ''}</span>`
+              ).join('')
+            : '';
+          return `<div class="card border-0 px-3 py-2" style="border-left:4px solid ${color}!important;box-shadow:0 1px 4px rgba(0,0,0,.08);min-width:180px">
+              <div class="fw-semibold small mb-1" style="color:${color}">
+                <i class="bi bi-database-fill me-1"></i>${esc(d.caption || d.name)}
+              </div>
+              ${conns}
+            </div>`;
         }).join('') + '</div>';
       document.getElementById('fields-table-wrap').before(panel);
     }
@@ -752,7 +968,7 @@ async function runFields() {
     document.getElementById('fields-result').innerHTML = '';
   } catch(e) {
     document.getElementById('fields-result').innerHTML =
-      `<div class="text-danger small text-center py-3">取得失敗: ${esc(String(e))}</div>`;
+      `<div class="text-danger small text-center py-3">${t('err_analyze')}${esc(String(e))}</div>`;
   } finally {
     btn.disabled = false;
   }
@@ -822,7 +1038,6 @@ function copyFormula(btn) {
 // Sankey 依存関係図（ツールチップ付き）
 // ─────────────────────────────────────────────
 function renderSankey(fields) {
-  // コンテナをクリア
   d3.select('#sankey-container').selectAll('*').remove();
 
   if (!fields.length) {
@@ -830,9 +1045,7 @@ function renderSankey(fields) {
     return;
   }
 
-  // エッジ生成（formula = target フィールドの formula）
   const fieldNames = new Set(fields.map(f => f.field));
-  const fieldMap   = Object.fromEntries(fields.map(f => [f.field, f]));
   const edgesMap   = {};
 
   fields.forEach(f => {
@@ -854,12 +1067,10 @@ function renderSankey(fields) {
     return;
   }
 
-  // データソース別色
   const dsNames  = [...new Set(fields.map(f => f.datasource))];
   const dsColors = Object.fromEntries(dsNames.map((n, i) => [n, DS_PALETTE[i % DS_PALETTE.length]]));
   const fieldDs  = Object.fromEntries(fields.map(f => [f.field, f.datasource]));
 
-  // ノード・リンク構築
   const nodeNames = new Set();
   edges.forEach(e => { nodeNames.add(e.source); nodeNames.add(e.target); });
   const nodes = Array.from(nodeNames).map(name => ({
@@ -940,13 +1151,13 @@ function renderSankey(fields) {
         + `<div class="d-flex justify-content-end mt-2 gap-1">`
         + `<button onclick="copyFormula(this)" data-formula="${esc(d.formula)}"
              class="btn btn-sm btn-primary py-0 px-2" style="font-size:0.75rem;pointer-events:auto">
-             <i class="bi bi-clipboard me-1"></i>コピー</button>`
+             <i class="bi bi-clipboard me-1"></i>${t('copy_btn')}</button>`
         + `<button onclick="window._sankeyTooltipUnpin&&window._sankeyTooltipUnpin()"
              class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.75rem;pointer-events:auto">✕</button>`
         + `</div>`;
     }
     return title + code
-      + `<div class="text-muted mt-1" style="font-size:0.65rem">クリックで固定してコピー</div>`;
+      + `<div class="text-muted mt-1" style="font-size:0.65rem">${t('copy_hint')}</div>`;
   }
 
   function resetAllLinks() {
@@ -955,7 +1166,6 @@ function renderSankey(fields) {
       .attr('stroke-opacity', isDark ? 0.55 : 0.45);
   }
 
-  // リンク描画
   svg.append('g').selectAll('path')
     .data(graph.links)
     .join('path')
@@ -990,13 +1200,11 @@ function renderSankey(fields) {
       window._sankeyTooltipUnpin = unpinTooltip;
     });
 
-  // SVG 背景クリックでピン解除
   svg.on('click', function() {
     if (_pinned) unpinTooltip();
     resetAllLinks();
   });
 
-  // ノード描画
   const node = svg.append('g').selectAll('g')
     .data(graph.nodes)
     .join('g');
@@ -1019,7 +1227,6 @@ function renderSankey(fields) {
     .on('mousemove', function(event) { positionTooltip(event); })
     .on('mouseout',  function() { resetAllLinks(); hideTooltip(); });
 
-  // ラベル描画（ハロー付き）
   node.append('text')
     .attr('x',            d => d.x0 < W / 2 ? d.x1 + 7 : d.x0 - 7)
     .attr('y',            d => (d.y0 + d.y1) / 2)
@@ -1101,6 +1308,7 @@ function downloadFieldsCSV() {
 // ─────────────────────────────────────────────
 // 起動
 // ─────────────────────────────────────────────
+applyLang(_lang);
 pollStatus();
 </script>
 </body>
